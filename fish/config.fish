@@ -31,6 +31,9 @@ alias gs="git status"
 alias gco="git checkout"
 alias glog="git log --oneline --graph --decorate --all"
 
+# Abbreviations
+abbr -a --position anywhere -- dotfiles $HOME/Development/Personal/dotfiles
+
 # Atlassian Dev variables
 export ATLASSIAN_VPN_MFA_DEFAULT="push"
 export ATLASSIAN_VPN_SERVER_DEFAULT="APSE2 Sydney (managed)"
