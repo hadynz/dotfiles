@@ -26,6 +26,9 @@ map("n", "U", "<C-r>", { desc = "Redo" })
 map("n", "<C-[>", "<C-o>", { desc = "Navigate back" })
 map("n", "<C-]>", "<C-i>", { desc = "Navigate forward" })
 
+-- Switch back and forth between last 2 buffers
+map("n", "ge", "<cmd>b#<CR>", { desc = "Switch back" })
+
 -- Using change without yank
 map({ "n", "v" }, "c", '"_c', { desc = "Change without yank" })
 map({ "n", "v" }, "C", '"_C', { desc = "Change without yank" })
