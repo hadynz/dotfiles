@@ -21,6 +21,31 @@ return {
       opts.mapping = vim.tbl_extend("force", opts.mapping, {
         ["<Tab>"] = cmp.mapping(cmp.mapping.confirm({ select = true }), { "i", "s" }),
         ["<CR>"] = cmp.mapping(cmp.mapping.confirm({ select = true }), { "i", "s" }),
+
+        -- Up/Down to move between options
+        -- @see https://github.com/mikesmithgh/nvim/blob/main/lua/plugins/cmp-cmdline.lua#L71
+        ['<Down>'] = {
+          c = function()
+            local fn = function()
+              vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Down>', true, false, true), 'n', true)
+            end
+            if cmp.visible() then
+              fn = cmp.mapping.select_next_item(select_opts)
+            end
+            fn()
+          end,
+        },
+        ['<Up>'] = {
+          c = function()
+            local fn = function()
+              vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes('<Up>', true, false, true), 'n', true)
+            end
+            if cmp.visible() then
+              fn = cmp.mapping.select_prev_item(select_opts)
+            end
+            fn()
+          end,
+        },
       });
 
       cmp.setup(opts)
