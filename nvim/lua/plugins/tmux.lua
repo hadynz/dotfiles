@@ -1,6 +1,7 @@
 return {
   {
     "aserowy/tmux.nvim",
+    enabled = false,
     config = function()
       require("tmux").setup({
         -- overwrite default configuration

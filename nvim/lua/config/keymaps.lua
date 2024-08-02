@@ -137,14 +137,14 @@ map("n", "<Leader>r", "<cmd>Telescope buffers sort_mru=true sort_lastused=true<c
 map("n", "<Leader>tr", "<cmd>:TestNearest<cr>", { desc = "Run test" })
 
 -- TMUX navigation
-map("n", "<C-h>", "<cmd>lua require'tmux'.move_left()<cr>", { desc = "Go to left window" })
-map("n", "<C-j>", "<cmd>lua require'tmux'.move_bottom()<cr>", { desc = "Go to lower window" })
-map("n", "<C-k>", "<cmd>lua require'tmux'.move_top()<cr>", { desc = "Go to upper window" })
-map("n", "<C-l>", "<cmd>lua require'tmux'.move_right()<cr>", { desc = "Go to right window" })
-map("n", "<C-Up>", "<cmd>lua require'tmux'.resize_top()<cr>", { desc = "Resize top" })
-map("n", "<C-Down>", "<cmd>lua require'tmux'.resize_bottom()<cr>", { desc = "Resize bottom" })
-map("n", "<C-Left>", "<cmd>lua require'tmux'.resize_left()<cr>", { desc = "Resize left" })
-map("n", "<C-Right>", "<cmd>lua require'tmux'.resize_right()<cr>", { desc = "Resize right" })
+map("n", "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", { desc = "Go to left window" })
+map("n", "<C-j>", "<cmd>lua require'smart-splits'.move_cursor_down()<cr>", { desc = "Go to lower window" })
+map("n", "<C-k>", "<cmd>lua require'smart-splits'.move_cursor_up()<cr>", { desc = "Go to upper window" })
+map("n", "<C-l>", "<cmd>lua require'smart-splits'.move_cursor_right()<cr>", { desc = "Go to right window" })
+map("n", "<C-Up>", "<cmd>lua require'smart-splits'.resize_up()<cr>", { desc = "Resize top" })
+map("n", "<C-Down>", "<cmd>lua require'smart-splits'.resize_down()<cr>", { desc = "Resize bottom" })
+map("n", "<C-Left>", "<cmd>lua require'smart-splits'.resize_left()<cr>", { desc = "Resize left" })
+map("n", "<C-Right>", "<cmd>lua require'smart-splits'.resize_right()<cr>", { desc = "Resize right" })
 
 -- Mouse selection copies to clipboard
 map("v", "<LeftRelease>", '"*ygv', { desc = "Mouse selection copies to clipboard" })
