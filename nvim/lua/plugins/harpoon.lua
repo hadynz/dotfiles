@@ -2,6 +2,7 @@ local notify = require("notify")
 
 return {
   "ThePrimeagen/harpoon",
+  enabled = false,
   keys = {
     -- Disable default binding to Harppon file
     { "<leader>H", false },
