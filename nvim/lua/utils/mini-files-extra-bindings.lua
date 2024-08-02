@@ -19,6 +19,12 @@ local toggle_dotfiles = function()
   MiniFiles.refresh({ content = { filter = new_filter } })
 end
 
+local open_current_directory = function()
+  local cur_entry_path = MiniFiles.get_fs_entry().path
+  local cur_directory = vim.fs.dirname(cur_entry_path)
+  vim.fn.jobstart("open " .. cur_directory, { detach = true })
+end
+
 -- Add custom mappings to select file and split screen
 -- @see: https://github.com/echasnovski/mini.nvim/blob/aac602e097b99a06bc84e43356f080eb6256dd21/doc/mini-files.txt#L420
 local map_split = function(buf_id, lhs, direction)
@@ -48,6 +54,7 @@ vim.api.nvim_create_autocmd("User", {
 
     -- Tweak left-hand side of mapping to your liking
     vim.keymap.set("n", "g.", toggle_dotfiles, { buffer = buf_id })
+    vim.keymap.set("n", "go", open_current_directory, { buffer = buf_id })
     vim.keymap.set("n", "q", MiniFiles.close, { buffer = buf_id })
 
     map_split(buf_id, "-", "belowright horizontal")
