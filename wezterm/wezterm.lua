@@ -1,35 +1,43 @@
 local wezterm = require 'wezterm'
-return {
-  -- color_scheme = 'termnial.sexy',
-  color_scheme = 'Catppuccin Mocha',
-  enable_tab_bar = false,
-  font_size = 16.0,
-  font = wezterm.font('JetBrains Mono'),
-  -- macos_window_background_blur = 40,
-  macos_window_background_blur = 30,
+local multiplexConfig = require 'wezterm-multiplex'
+local smartSplitsConfig = require 'wezterm-smart-splits'
+local utils = require 'utils'
 
-  -- window_background_image = '/Users/omerhamerman/Downloads/3840x1080-Wallpaper-041.jpg',
-  -- window_background_image_hsb = {
-  -- 	brightness = 0.01,
-  -- 	hue = 1.0,
-  -- 	saturation = 0.5,
-  -- },
-  -- window_background_opacity = 0.92,
-  window_background_opacity = 1.0,
-  -- window_background_opacity = 0.78,
-  -- window_background_opacity = 0.20,
-  window_decorations = 'RESIZE',
+local hyperKey = 'SHIFT | ALT | CTRL | SUPER'
+
+local config = {
+  -- debug_key_events = true,
+  -- term = "wezterm",
+  color_scheme = "Catppuccin Frappe",
+
+  freetype_load_flags = 'NO_HINTING',
+  font_size = 12.40,
+  font = wezterm.font_with_fallback({
+    { family = "JetBrains Mono",         weight = "Medium" },
+    { family = "Symbols Nerd Font Mono", scale = 0.75 }
+  }),
+  line_height = 1.10,
+  use_cap_height_to_scale_fallback_fonts = true,
+  -- macos_window_background_blur = 40,
+  -- window_background_opacity = 0.82,
+  -- enable_tab_bar = false,        -- Hide tab bar
+  window_decorations = 'RESIZE', -- Hide window chrome
+  leader = { key = "A", mods = hyperKey, timeout_milliseconds = 1001 },
+  use_fancy_tab_bar = false,
+  inactive_pane_hsb = { brightness = 0.60 },
+  -- font_end = "WebGpu",
+
   keys = {
-    {
-      key = 'f',
-      mods = 'CTRL',
-      action = wezterm.action.ToggleFullScreen,
-    },
-    {
-      key = '\'',
-      mods = 'CTRL',
-      action = wezterm.action.ClearScrollback 'ScrollbackAndViewport',
-    },
+    -- Map Mac's Cmd + key to Ctrl + key
+    utils.mapCmdToCtrl('p', 'p'),
+    utils.mapCmdToCtrl('[', 'o'),
+    utils.mapCmdToCtrl(']', 'i'),
+    -- Map Hyper + A to Ctrl + A (used as TMUX prefix)
+    -- {
+    --   key = 'a',
+    --   mods = hyperKey,
+    --   action = act.SendKey { key = 'a', mods = 'CTRL' },
+    -- },
   },
   mouse_bindings = {
     -- Ctrl-click will open the link under the mouse cursor
@@ -40,3 +48,8 @@ return {
     },
   },
 }
+
+multiplexConfig.apply_to_config(config)
+smartSplitsConfig.apply_to_config(config)
+
+return config;
