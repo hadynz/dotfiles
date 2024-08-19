@@ -1,3 +1,17 @@
+local save_file_to_arrow = function()
+  local notify = require("notify")
+  local persist = require("arrow.persist")
+  local utils = require("arrow.utils")
+
+  local fileName = utils.get_current_buffer_path()
+  if fileName then
+    persist.save(fileName)
+    notify('Added "' .. fileName .. '"', vim.log.levels.INFO, {
+      title = "Arrow",
+    })
+  end
+end
+
 return {
   {
     "otavioschwanck/arrow.nvim",
@@ -25,6 +39,13 @@ return {
           require("arrow.ui").openMenu()
         end,
         desc = "Arrow Quick Menu",
+      },
+      {
+        "<leader>h",
+        function()
+          save_file_to_arrow()
+        end,
+        desc = "Arrow File",
       },
       { "<leader>1", function() require("arrow.persist").go_to(1) end, desc = "Arrow file 1" },
       { "<leader>2", function() require("arrow.persist").go_to(2) end, desc = "Arrow file 2" },
