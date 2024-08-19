@@ -1,7 +1,6 @@
-local MiniFiles = require("mini.files")
-
 -- Toggle visibility of mini.files explorer
 local toggle_minifiles = function(...)
+  local MiniFiles = require("mini.files")
   if not MiniFiles.close() then
     MiniFiles.open(...)
   end
