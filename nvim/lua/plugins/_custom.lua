@@ -1,11 +1,12 @@
 return {
   -- Install plugins (with no config)
-  { "lbrayner/vim-rzip" }, -- Required for Yarn PnP
-  { "linrongbin16/gitlinker.nvim", cmd = "GitLink", opts = {} }, -- Open git files remotely
+  { "lbrayner/vim-rzip" },                                               -- Required for Yarn PnP
+  { "linrongbin16/gitlinker.nvim",         cmd = "GitLink", opts = {} }, -- Open git files remotely
+  { "sitiom/nvim-numbertoggle" },                                        -- Relative numbers on only for current buffer in Normal mode
 
   -- Disable Plugins
-  { "nvim-neo-tree/neo-tree.nvim", enabled = false }, -- Replaced with mini.files
-  { "akinsho/bufferline.nvim", enabled = false }, -- Disable buffer tabs
+  { "nvim-neo-tree/neo-tree.nvim",         enabled = false }, -- Replaced with mini.files
+  { "akinsho/bufferline.nvim",             enabled = false }, -- Disable buffer tabs
   { "lukas-reineke/indent-blankline.nvim", enabled = false },
-  { "folke/flash.nvim", enabled = false }, -- Disable flash; go all in on hop
+  { "folke/flash.nvim",                    enabled = false }, -- Disable flash; go all in on hop
 }
