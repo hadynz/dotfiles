@@ -2,6 +2,7 @@ return {
   {
     "folke/trouble.nvim",
   },
+
   {
     "nvim-lualine/lualine.nvim",
     opts = function(_, opts)

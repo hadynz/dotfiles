@@ -109,7 +109,8 @@ function M.apply_to_config(config)
     {
       key = 'k',
       mods = 'CMD',
-      action = wezterm.action.ClearScrollback('ScrollbackAndViewport'),
+      -- action = wezterm.action.ClearScrollback('ScrollbackAndViewport'),
+      action = wezterm.action.ActivatePaneDirection("Right"),
     },
   })
 

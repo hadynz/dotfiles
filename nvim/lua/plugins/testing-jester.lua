@@ -5,7 +5,7 @@ return {
     require("jester").setup({
       cmd = function()
         return "echo hello"
-      end
+      end,
     })
-  end
+  end,
 }

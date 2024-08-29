@@ -12,8 +12,9 @@ end
 
 return {
   {
-    "awerebea/git-worktree.nvim",
-    branch = "handle_changes_in_telescope_api",
+    "polarmutex/git-worktree.nvim",
+    enabled = false,
+    -- branch = "handle_changes_in_telescope_api",
     dependencies = {
       "nvim-telescope/telescope.nvim",
       config = function()
@@ -26,4 +27,11 @@ return {
       { "<leader>gW", create_worktrees, desc = "Create git worktree" },
     },
   },
+
+  {
+    "Mohanbarman/g-worktree.nvim",
+    opts = {
+
+    }
+  }
 }

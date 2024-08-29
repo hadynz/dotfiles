@@ -32,12 +32,23 @@ local config = {
     utils.mapCmdToCtrl('p', 'p'),
     utils.mapCmdToCtrl('[', 'o'),
     utils.mapCmdToCtrl(']', 'i'),
+
     -- Map Hyper + A to Ctrl + A (used as TMUX prefix)
-    -- {
-    --   key = 'a',
-    --   mods = hyperKey,
-    --   action = act.SendKey { key = 'a', mods = 'CTRL' },
-    -- },
+    {
+      key = 'Q',
+      mods = hyperKey,
+      action = wezterm.action.SendKey { key = 'q', mods = 'CTRL' },
+    },
+    {
+      key = 'CapsLock',
+      mods = 'CTRL',
+      action = wezterm.action.SendKey { key = 'Escape', mods = 'CTRL' },
+    },
+    {
+      key = '-',
+      mods = 'CTRL',
+      action = wezterm.action.SendKey { key = '-', mods = 'CTRL' },
+    },
   },
   mouse_bindings = {
     -- Ctrl-click will open the link under the mouse cursor

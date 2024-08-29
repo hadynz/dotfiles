@@ -8,8 +8,8 @@ return {
       -- style = "#00ffff",
     },
     chunk = {
-      enable = true,
       use_treesitter = true,
+      enable = true,
       chars = {
         horizontal_line = "─",
         vertical_line = "│",

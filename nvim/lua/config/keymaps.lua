@@ -29,6 +29,14 @@ map("n", "<C-]>", "<C-i>", { desc = "Navigate forward" })
 -- Switch back and forth between last 2 buffers
 map("n", "ge", "<cmd>b#<CR>", { desc = "Switch back" })
 
+-- Git Worktree management
+map("n", "<leader>gw", function()
+  require("telescope").extensions.g_worktree.list()
+end, { desc = "Switch git worktree" })
+map("n", "<leader>gW", function()
+  require("telescope").extensions.g_worktree.create()
+end, { desc = "Create git worktree" })
+
 -- Using change without yank
 map({ "n", "v" }, "c", '"_c', { desc = "Change without yank" })
 map({ "n", "v" }, "C", '"_C', { desc = "Change without yank" })
@@ -42,10 +50,13 @@ map({ "n", "v" }, "<leader>d", '"_d', { desc = "Delete without yank" })
 -- Disable default `s` keybind - reusing it for `hop`
 map("n", "s", "<nop>", { desc = "Disable default `s` keybind" })
 
+-- Select more lines in visual mode - e.g. VV for 2 lines, VVV for 3 lines
+map("x", "V", "j")
+
 -- Clear highlight of search, messages, floating windows
 map({ "n", "i" }, "<Esc>", function()
-  vim.cmd([[nohl]])                                 -- clear highlight of search
-  vim.cmd([[stopinsert]])                           -- clear messages (the line below statusline)
+  vim.cmd([[nohl]]) -- clear highlight of search
+  vim.cmd([[stopinsert]]) -- clear messages (the line below statusline)
   for _, win in ipairs(vim.api.nvim_list_wins()) do -- clear all floating windows
     if vim.api.nvim_win_get_config(win).relative == "win" then
       vim.api.nvim_win_close(win, false)
@@ -53,11 +64,34 @@ map({ "n", "i" }, "<Esc>", function()
   end
 end, { desc = "Clear highlight search, messages, floating windows" })
 
+-- Invoke VIM command to move j/k directions + keep cursor centered for any buffers with line numbers
+-- This method means all plugin buffers will be excluded and use standard vim behaviour
+local keep_cursor_centered = function(jk_direction)
+  local excluded_filetypes = { "harpoon", "minifiles" }
+
+  -- Invoke norm command if filetype is in excluded list
+  for _, filetype in ipairs(excluded_filetypes) do
+    if vim.o.filetype == filetype then
+      vim.cmd("norm! " .. jk_direction)
+      return
+    end
+  end
+
+  vim.cmd("norm! " .. jk_direction .. "zz") -- Keep cursor centered on all vertical movements
+end
+
 -- Keep cursor centered when navigating
-map("n", "k", "kzz", { desc = "Keep cursor centered on up" })
-map("n", "j", "jzz", { desc = "Keep cursor centered on down" })
+map("n", "k", function()
+  keep_cursor_centered("k")
+end, { desc = "Keep cursor centered on up" })
+map("n", "j", function()
+  keep_cursor_centered("j")
+end, { desc = "Keep cursor centered on down" })
+map("n", "G", "Gzz", { desc = "Keep cursor centered on page end" })
 map("n", "<C-u>", "<C-u>zz", { desc = "Keep cursor centered on page up" })
 map("n", "<C-d>", "<C-d>zz", { desc = "Keep cursor centered on page down" })
+map("n", "*", "*zz", { desc = "Keep cursor centered on search next" })
+map("n", "#", "#zz", { desc = "Keep cursor centered on search previous" })
 
 -- Mapping for dd that doesn't yank a single empty line into the default register:
 map("n", "dd", function()
@@ -73,8 +107,8 @@ vim.api.nvim_set_keymap("i", "cll", "console.log();<ESC>F(a", { noremap = false,
 vim.api.nvim_set_keymap("n", "cll", "yiw%ocll'<Esc>pla, <Esc>p2b", { noremap = false, silent = true })
 
 -- Yank History Picker
-map("n", "<Leader>p", require("telescope").extensions.yank_history.yank_history, { desc = "Yank History Picker" })
-map("i", "<C-r>", require("telescope").extensions.yank_history.yank_history, { desc = "Yank History Picker" })
+map("n", "<Leader>p", "<cmd>Telescope yank_history theme=cursor previewer=false<cr>", { desc = "Yank History Picker" })
+map("i", "<C-r>", "<cmd>Telescope yank_history theme=cursor previewer=false<cr>", { desc = "Yank History Picker" })
 
 -- In insert mode, either move cursor right, or trigger next copilot suggestion
 local move_right = function()
@@ -104,13 +138,13 @@ map("i", "<C-k>", "<Up>", { desc = "Move cursor up" })
 map("i", "<C-l>", move_right, { desc = "Move cursor right" })
 
 -- LSP keymaps
-map("n", "ga", vim.lsp.buf.code_action, { desc = "Code action" })
--- map("n", "gr", vim.lsp.buf.rename, { desc = "Rename" })
-map("n", "gR", telescope_builtin_utils.lsp_references, { desc = "Find all references" })
+map("n", "gr", telescope_builtin_utils.lsp_references, { desc = "Find all references" })
 map("n", "gh", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
-map("n", "gd", vim.lsp.buf.definition, { desc = "Goto definition" })
 map("n", "go", LazyVim.lsp.action["source.organizeImports"], { desc = "Format" })
 map("n", "==", vim.lsp.buf.format, { desc = "Format" })
+
+-- LSP keymap previews
+map("n", "gp", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", { noremap = true })
 
 -- Diagnostics
 map("n", "<M-j>", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
@@ -122,19 +156,20 @@ map("n", "<Leader>gR", "<cmd>GitLink!<CR>", { desc = "Open Remote File" })
 map("n", "<Leader>gB", "<cmd>GitLink! blame<CR>", { desc = "Open Remote File with Blame" })
 
 -- Before/After
-map("n", "[o", "m`O<esc>d0x``", { desc = "Empty line above" })        -- new line before
-map("n", "]o", "m`o<esc>d0x``", { desc = "Empty line below" })        -- new line after
+map("n", "[o", "m`O<esc>d0x``", { desc = "Empty line above" }) -- new line before
+map("n", "]o", "m`o<esc>d0x``", { desc = "Empty line below" }) -- new line after
 map("n", "<Leader>O", "m`O<esc>d0x``", { desc = "Empty line above" }) -- new line before
 map("n", "<Leader>o", "m`o<esc>d0x``", { desc = "Empty line below" }) -- new line after
-map("n", "[p", "m`P``", { desc = "Paste before" })                    -- paste before
+map("n", "[p", "m`P``", { desc = "Paste before" }) -- paste before
 
 -- No yank on visual paste
 map("v", "p", "P", { noremap = true, silent = true })
 
 -- Telescope
-map("n", "<C-p>", telescope_builtin_utils.git_files, { desc = "Find File" })                                    -- iTerm maps Cmd+p to Ctrl+p
+map("n", "<C-p>", telescope_builtin_utils.find_files, { desc = "Find File" }) -- iTerm maps Cmd+p to Ctrl+p
 map("n", "<Leader>a", telescope_builtin_utils.commands, { desc = "Find Action" })
-map("n", "<Leader>r", "<cmd>Telescope buffers sort_mru=true sort_lastused=true<cr>", { desc = "Recent Files" }) -- iTerm maps Cmd+p to Ctrl+p
+map("n", "<Leader>r", "<cmd>Telescope oldfiles<cr>", { desc = "Recent Files" })
+map("n", "<Leader>/", "<cmd>Telescope live_grep_args<cr>", { desc = "Live Grep (Args)" })
 
 -- Testing
 map("n", "<Leader>tr", "<cmd>:TestNearest<cr>", { desc = "Run test" })

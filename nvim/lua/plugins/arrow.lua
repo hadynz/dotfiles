@@ -33,28 +33,28 @@ return {
       separate_save_and_remove = true, -- Disable toggle when saving buffer to arrow
     },
     keys = {
-      {
-        "<leader>`",
-        function()
-          require("arrow.ui").openMenu()
-        end,
-        desc = "Arrow Quick Menu",
-      },
-      {
-        "<leader>h",
-        function()
-          save_file_to_arrow()
-        end,
-        desc = "Arrow File",
-      },
-      { "<leader>1", function() require("arrow.persist").go_to(1) end, desc = "Arrow file 1" },
-      { "<leader>2", function() require("arrow.persist").go_to(2) end, desc = "Arrow file 2" },
-      { "<leader>3", function() require("arrow.persist").go_to(3) end, desc = "Arrow file 3" },
-      { "<leader>4", function() require("arrow.persist").go_to(4) end, desc = "Arrow file 4" },
-      { "<leader>5", function() require("arrow.persist").go_to(5) end, desc = "Arrow file 5" },
-      { "<leader>6", function() require("arrow.persist").go_to(6) end, desc = "Arrow file 6" },
-      { "<leader>7", function() require("arrow.persist").go_to(7) end, desc = "Arrow file 7" },
-      { "<leader>8", function() require("arrow.persist").go_to(8) end, desc = "Arrow file 8" },
+      -- {
+      --   "<leader>`",
+      --   function()
+      --     require("arrow.ui").openMenu()
+      --   end,
+      --   desc = "Arrow Quick Menu",
+      -- },
+      -- {
+      --   "<leader>h",
+      --   function()
+      --     save_file_to_arrow()
+      --   end,
+      --   desc = "Arrow File",
+      -- },
+      -- { "<leader>1", function() require("arrow.persist").go_to(1) end, desc = "Arrow file 1" },
+      -- { "<leader>2", function() require("arrow.persist").go_to(2) end, desc = "Arrow file 2" },
+      -- { "<leader>3", function() require("arrow.persist").go_to(3) end, desc = "Arrow file 3" },
+      -- { "<leader>4", function() require("arrow.persist").go_to(4) end, desc = "Arrow file 4" },
+      -- { "<leader>5", function() require("arrow.persist").go_to(5) end, desc = "Arrow file 5" },
+      -- { "<leader>6", function() require("arrow.persist").go_to(6) end, desc = "Arrow file 6" },
+      -- { "<leader>7", function() require("arrow.persist").go_to(7) end, desc = "Arrow file 7" },
+      -- { "<leader>8", function() require("arrow.persist").go_to(8) end, desc = "Arrow file 8" },
     },
   },
   {

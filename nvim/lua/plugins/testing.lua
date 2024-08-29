@@ -13,33 +13,51 @@ return {
   },
   {
     "nvim-neotest/neotest",
-    enabled = false,
+    event = "LspAttach",
     dependencies = {
+      "nvim-treesitter/nvim-treesitter",
       "nvim-neotest/neotest-jest"
     },
     opts = {
+      discovery = {
+        enabled = false, -- Better performance?
+      },
       adapters = {
         ["neotest-jest"] = {
-          jestCommand = "yarn test --",
-          jestConfigFile = function(file)
-            if string.find(file, "/packages/") then
-              local bla = string.match(file, "(.-/[^/]+/)src") .. "jest.config.ts"
-              print("1. jestConfigFile: " .. bla)
-              return bla
-            end
+          jestCommand = "npm test --",
+          -- jestConfigFile = function(file)
+          --   if string.find(file, "/packages/") then
+          --     local bla = string.match(file, "(.-/[^/]+/)src") .. "jest.config.ts"
+          --     print("1. jestConfigFile: " .. bla)
+          --     return bla
+          --   end
 
-            local path = vim.fn.getcwd() .. "/jest.config.ts"
-            print("2a. jestConfigFile: " .. path)
-            print("2b. file: " .. file)
-            print("2c. cwd: " .. vim.fn.getcwd())
-            return path
-          end,
-          env = { CI = true },
-          cwd = function()
-            return vim.fn.getcwd()
+          --   local path = vim.fn.getcwd() .. "/jest.config.ts"
+          --   print("2a. jestConfigFile: " .. path)
+          --   print("2b. file: " .. file)
+          --   print("2c. cwd: " .. vim.fn.getcwd())
+          --   return path
+          -- end,
+          -- -- env = { CI = true },
+          cwd = function(path)
+            local root_path = require("lspconfig").util.root_pattern "package.json" (path)
+            return root_path or vim.fn.getcwd()
           end,
         }
-      }
+      },
+      quickfix = {
+        enabled = false,
+        open = false,
+      },
+      output_panel = {
+        enabled = true,
+        open = 'rightbelow vsplit | resize 30',
+      },
+      status = {
+        enabled = true,
+        virtual_text = false,
+        signs = true,
+      },
     },
     keys = {
       { "gj",         run_nearest,     desc = "Run Test", },

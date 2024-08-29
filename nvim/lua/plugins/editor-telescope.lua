@@ -54,6 +54,7 @@ return {
       opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
         prompt_prefix = "   ",
         selection_caret = " ",
+        path_display = { "smart" },
         mappings = {
           i = {
             ["<C-u>"] = false,        -- Mapping <C-u> to clear prompt
@@ -73,9 +74,21 @@ return {
         },
       })
       opts.pickers = vim.tbl_deep_extend("force", opts.pickers or {}, {
+        lsp_definitions = {
+          on_complete = {
+            function(picker)
+              print("on complete!")
+            end
+          }
+        },
         oldfiles = {
+          prompt_title = "Recent files",
+          only_cwd = true,
           theme = "dropdown",
           previewer = false,
+          layout_config = {
+            width = 200,
+          },
         },
       })
       opts.extensions = vim.tbl_deep_extend("force", opts.extensions or {}, {

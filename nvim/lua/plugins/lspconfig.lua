@@ -4,7 +4,7 @@ return {
     opts = {
       diagnostics = {
         -- hide inline errors/warnings in editor
-        virtual_text = false
+        virtual_text = false,
       },
       servers = {
         tsserver = {
@@ -19,7 +19,7 @@ return {
             --     enable = false,
             --   },
             -- }
-          }
+          },
         },
         vtsls = {
           -- Required to inform LSP server to send `zipfile:` URI as `zip:` (Yarn PNP need)
@@ -33,13 +33,23 @@ return {
           settings = {
             typescript = {
               tsdk = ".yarn/sdks/typescript/lib",
+
+              -- Disable noisey inlay hints
+              inlayHints = {
+                enumMemberValues = { enabled = false },
+                functionLikeReturnTypes = { enabled = false },
+                parameterNames = { enabled = false },
+                parameterTypes = { enabled = false },
+                propertyDeclarationTypes = { enabled = false },
+                variableTypes = { enabled = false },
+              },
             },
           },
 
           keys = {
             -- disable plugins.extra.lang.typescript default `gR` key
             { "gR", false },
-          }
+          },
         },
       },
     },
@@ -53,17 +63,20 @@ return {
       -- disable signature help showing in insert mode; conflicts with hjkl navigation in insert mode
       keys[#keys + 1] = { "<c-k>", false, mode = "i" }
 
+      -- Override defaults to replace with custom keymapping
+      keys[#keys + 1] = { "gr", false, mode = "n" } -- Rename
+
       -- replace default variable rename with `inc-rename` lib
-      keys[#keys + 1] = {
-        "gr",
-        function()
-          local inc_rename = require("inc_rename")
-          return ":" .. inc_rename.config.cmd_name .. " " .. vim.fn.expand("<cword>")
-        end,
-        expr = true,
-        desc = "Rename variable",
-        has = "rename",
-      }
-    end
-  }
+      -- keys[#keys + 1] = {
+      --   "gr",
+      --   function()
+      --     local inc_rename = require("inc_rename")
+      --     return ":" .. inc_rename.config.cmd_name .. " " .. vim.fn.expand("<cword>")
+      --   end,
+      --   expr = true,
+      --   desc = "Rename variable",
+      --   has = "rename",
+      -- }
+    end,
+  },
 }
