@@ -18,6 +18,8 @@ alias vi="vim"
 alias oldvi="vi"
 alias ll="ls -la"
 alias c="clear"
+alias nap="/Users/hosman/go/bin/nap"
+alias fnm="/opt/homebrew/bin/fnm"
 
 # Git Aliases
 alias gl="git pull"
@@ -31,12 +33,12 @@ alias gs="git status"
 alias gco="git checkout"
 alias glog="git log --oneline --graph --decorate --all"
 
-# Abbreviations
-abbr -a --position anywhere -- dotfiles $HOME/Development/Personal/dotfiles
-
 # Atlassian Dev variables
 export ATLASSIAN_VPN_MFA_DEFAULT="push"
 export ATLASSIAN_VPN_SERVER_DEFAULT="APSE2 Sydney (managed)"
+
+# Use VI mode
+set -g fish_key_bindings fish_vi_key_bindings
 
 # Emulates vim's cursor shape behavior
 set fish_cursor_default block # Set the normal and visual mode cursors to a block 
@@ -52,20 +54,16 @@ source "$HOME/.cargo/env.fish"
 # ADD FNM to path
 source ~/.config/fish/conf.d/fnm.fish
 
+# Configure zoxide to replace `cd`
+zoxide init --cmd cd fish | source
+
 # Run Starship prompt
 starship init fish | source
 export STARSHIP_CONFIG=~/.config/starship/starship.toml
 
+# Config NAP (snippets Go app) to use nvim as editor
+export EDITOR="nvim"
+
 # Change LazyGit config directory
 export XDG_CONFIG_HOME="$HOME/.config"
 
-# Configure neovim-remote
-## Check if NVIM_LISTEN_ADDRESS is set and not empty
-# if set -q NVIM_LISTEN_ADDRESS
-#   alias nvim="nvr -cc split --remote-wait +'set bufhidden=wipe'"
-#   export VISUAL="nvr -cc split --remote-wait +'set bufhidden=wipe'"
-#   export EDITOR="nvr -cc split --remote-wait +'set bufhidden=wipe'"
-# else
-#   export VISUAL="nvim"
-#   export EDITOR="nvim"
-# end

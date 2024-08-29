@@ -2,3 +2,11 @@
 tmux/plugins/
 raycast
 fzf
+
+# Fish shell
+fish/completions/*
+fish/conf.d/*
+fish/functions/*
+fish/vendor/*
+fish/fish_variables
+
