@@ -1,23 +1,11 @@
 return {
-  -- Split/Join lines
-  {
-    "Wansmer/treesj",
-    keys = {
-      { "<leader>s", function() require("treesj").toggle() end, desc = "󰗈 Split-join lines" },
-    },
-    opts = {
-      use_default_keymaps = false,
-      cursor_behavior = "start",
-      max_join_length = 200,
-    },
-  },
-
   -- quick adding log statements
   {
     "chrisgrieser/nvim-chainsaw",
-    -- init = function()
-    --   vim.g.whichkeyAddGroup("<leader>l", "󰐪 Log")
-    -- end,
+    init = function()
+      local wk = require("which-key")
+      wk.add({ "<leader>l", group = "Logging" })
+    end,
     opts = {
       marker = "🖨️",
     },
@@ -37,11 +25,4 @@ return {
       { "<leader>lr", function() require("chainsaw").removeLogs() end, desc = "󰐪 󰅗 remove logs" },
     },
   },
-
-  {
-    "saecki/live-rename.nvim",
-    keys = {
-      { "gR",        function() require("live-rename").rename() end, desc = "Rename" },
-    }
-  }
 }
