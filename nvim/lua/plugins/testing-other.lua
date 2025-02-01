@@ -62,10 +62,10 @@ return {
       })
     end,
     keys = {
-      { "gt",   "<cmd>Other<cr>",       desc = "Open 'other' file" },
-      { "gtt",  "<cmd>Other<cr>",       desc = "Open 'other' file" },
+      { "gt", "<cmd>Other<cr>", desc = "Open 'other' file" },
+      { "gtt", "<cmd>Other<cr>", desc = "Open 'other' file" },
       { "gt\\", "<cmd>OtherVSplit<cr>", desc = "Open 'other' vertical split file" },
-      { "gt-",  "<cmd>OtherSplit<cr>",  desc = "Open 'other' split file" },
+      { "gt-", "<cmd>OtherSplit<cr>", desc = "Open 'other' split file" },
     },
   },
 }
