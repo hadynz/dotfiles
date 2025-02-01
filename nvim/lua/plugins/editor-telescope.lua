@@ -52,6 +52,9 @@ return {
       local lga_actions = require("telescope-live-grep-args.actions")
 
       opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
+        preview = {
+          filesize_limit = 0.1, -- Ignore preview for files larger than 100kb
+        },
         prompt_prefix = "   ",
         selection_caret = " ",
         path_display = { "smart" },
