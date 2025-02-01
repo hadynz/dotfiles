@@ -1,11 +1,12 @@
 return {
   "aznhe21/actions-preview.nvim",
   event = "VeryLazy",
+  -- enabled = false,
   opts = {
     telescope = vim.tbl_extend("force", require("telescope.themes").get_cursor(), {
-      previewer = false,
+      previewer = true,
       layout_config = {
-        width = 130,
+        width = 0.5,
         height = 20,
       },
     }),
