@@ -16,10 +16,23 @@ alias canvas="cd $HOME/atlassian/canvas"
 alias vim="nvim --listen /tmp/nvim-server.pipe"
 alias vi="vim"
 alias oldvi="vi"
-alias ll="ls -la"
 alias c="clear"
 alias nap="/Users/hosman/go/bin/nap"
 alias fnm="/opt/homebrew/bin/fnm"
+
+# ls Aliases
+alias ll="eza --group --group-directories-first --git --long --all --sort=type"
+
+## List files/dirs with tree view. Takes in single param to specify tree depth
+function lt
+  set -q argv[1]; or set argv[1] "."
+  set -q argv[2]; or set argv[2] 1 
+  eza --group --header --group-directories-first --git --tree --level $argv[2] $argv[1]
+end
+funcsave lt
+
+# fzf Aliases
+alias fzf="fzf --preview 'bat --color=always --style=header,grid --line-range :500 {}'"
 
 # Git Aliases
 alias gl="git pull"
