@@ -104,6 +104,11 @@ function M.apply_to_config(config)
       mods = "LEADER",
       action = wezterm.action.ActivateCopyMode,
     },
+    {
+      key = "[",
+      mods = "CMD",
+      action = wezterm.action.ActivateCopyMode,
+    },
 
     -- Clear Terminal
     {

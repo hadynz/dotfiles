@@ -18,8 +18,8 @@ local config = {
   }),
   line_height = 1.10,
   use_cap_height_to_scale_fallback_fonts = true,
-  -- macos_window_background_blur = 40,
-  -- window_background_opacity = 0.82,
+  macos_window_background_blur = 40,
+  window_background_opacity = 1,
   -- enable_tab_bar = false,        -- Hide tab bar
   window_decorations = 'RESIZE', -- Hide window chrome
   leader = { key = "A", mods = hyperKey, timeout_milliseconds = 1001 },
