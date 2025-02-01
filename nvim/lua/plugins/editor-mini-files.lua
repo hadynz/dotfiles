@@ -21,6 +21,7 @@ return {
       mappings = {
         close = "<Esc>",
         go_in_plus = "<CR>",
+        show_help = "?",
       },
       options = {
         use_as_default_explorer = true,
