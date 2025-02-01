@@ -3,6 +3,7 @@
 -- Add any additional keymaps here
 M = {}
 
+local wk = require("which-key")
 local telescope_builtin_utils = require("telescope.builtin")
 
 -- Custom keymap function that checks if a lazy keys handler exists before creating a keymap
@@ -18,6 +19,15 @@ local function map(mode, lhs, rhs, opts)
     vim.keymap.set(mode, lhs, rhs, opts)
   end
 end
+
+-- Delete global LazyVim keymaps
+vim.keymap.del({ "n" }, "<leader>l")
+vim.keymap.del({ "n" }, "<leader>L")
+
+-- LazyVim distro keymaps
+wk.add({ "<leader>L", group = "LazyVim" })
+map("n", "<leader>Ll", "<cmd>Lazy<CR>", { desc = "Lazy" })
+map("n", "<leader>LL", function() LazyVim.news.changelog() end, { desc = "LazyVim Changelog" })
 
 -- Redo
 map("n", "U", "<C-r>", { desc = "Redo" })
@@ -49,14 +59,14 @@ map({ "n", "v" }, "<leader>d", '"_d', { desc = "Delete without yank" })
 
 -- Disable default `s` keybind - reusing it for `hop`
 map("n", "s", "<nop>", { desc = "Disable default `s` keybind" })
-
+-- map("n", "s", "<nop>", { desc = "Disable default `s` keybind" })
 -- Select more lines in visual mode - e.g. VV for 2 lines, VVV for 3 lines
 map("x", "V", "j")
 
 -- Clear highlight of search, messages, floating windows
 map({ "n", "i" }, "<Esc>", function()
-  vim.cmd([[nohl]]) -- clear highlight of search
-  vim.cmd([[stopinsert]]) -- clear messages (the line below statusline)
+  vim.cmd([[nohl]])                                 -- clear highlight of search
+  vim.cmd([[stopinsert]])                           -- clear messages (the line below statusline)
   for _, win in ipairs(vim.api.nvim_list_wins()) do -- clear all floating windows
     if vim.api.nvim_win_get_config(win).relative == "win" then
       vim.api.nvim_win_close(win, false)
@@ -139,6 +149,7 @@ map("i", "<C-l>", move_right, { desc = "Move cursor right" })
 
 -- LSP keymaps
 map("n", "gr", telescope_builtin_utils.lsp_references, { desc = "Find all references" })
+map("n", "gA", LazyVim.lsp.action.source, { desc = "Source Action" })
 map("n", "gh", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
 map("n", "go", LazyVim.lsp.action["source.organizeImports"], { desc = "Format" })
 map("n", "==", vim.lsp.buf.format, { desc = "Format" })
@@ -156,11 +167,11 @@ map("n", "<Leader>gR", "<cmd>GitLink!<CR>", { desc = "Open Remote File" })
 map("n", "<Leader>gB", "<cmd>GitLink! blame<CR>", { desc = "Open Remote File with Blame" })
 
 -- Before/After
-map("n", "[o", "m`O<esc>d0x``", { desc = "Empty line above" }) -- new line before
-map("n", "]o", "m`o<esc>d0x``", { desc = "Empty line below" }) -- new line after
+map("n", "[o", "m`O<esc>d0x``", { desc = "Empty line above" })        -- new line before
+map("n", "]o", "m`o<esc>d0x``", { desc = "Empty line below" })        -- new line after
 map("n", "<Leader>O", "m`O<esc>d0x``", { desc = "Empty line above" }) -- new line before
 map("n", "<Leader>o", "m`o<esc>d0x``", { desc = "Empty line below" }) -- new line after
-map("n", "[p", "m`P``", { desc = "Paste before" }) -- paste before
+map("n", "[p", "m`P``", { desc = "Paste before" })                    -- paste before
 
 -- No yank on visual paste
 map("v", "p", "P", { noremap = true, silent = true })
