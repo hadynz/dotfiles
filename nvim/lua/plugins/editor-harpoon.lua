@@ -1,5 +1,3 @@
-local notify = require("notify")
-
 return {
   "ThePrimeagen/harpoon",
   branch = "harpoon2",
@@ -19,7 +17,7 @@ return {
           require("harpoon"):list():add()
 
           local fileName = vim.fn.expand("%:t")
-          notify('Added "' .. fileName .. '"', vim.log.levels.INFO, {
+          vim.notify('Added "' .. fileName .. '"', vim.log.levels.INFO, {
             title = "Harpoon",
           })
         end,
