@@ -11,7 +11,7 @@ return {
     priority = 1000,
     opts = {
       flavour = "mocha",
-      -- transparent_background = true,
+      transparent_background = true,
       dim_inactive = {
         enabled = true, -- dims the background color of inactive window
         shade = "dark",
