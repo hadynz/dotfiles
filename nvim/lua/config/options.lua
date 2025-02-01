@@ -17,3 +17,6 @@ opt.listchars:append("space:⋅")
 opt.listchars:append("tab:» ")
 opt.listchars:append("trail:~")
 
+-- Turn on spell checking
+opt.spell = true
+opt.spelllang = "en_nz"
