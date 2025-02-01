@@ -61,13 +61,6 @@ return {
           desc = "Hop before prev char",
           mode = { "n", "v", "x", "o" }
         },
-        {
-          "s",
-          function()
-            require("which-key").show("s")
-          end,
-          desc = "Show which-key"
-        },
       }
       return keys
     end,
