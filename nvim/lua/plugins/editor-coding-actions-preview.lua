@@ -9,6 +9,7 @@ return {
         width = 0.5,
         height = 20,
       },
+      resizing_mappings = true,
     }),
   },
   keys = {

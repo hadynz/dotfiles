@@ -1,3 +1,11 @@
+local bind_close_buffer = function(key, buff, win)
+  vim.keymap.set("n", key, function()
+    if vim.api.nvim_win_is_valid(win) then
+      vim.api.nvim_win_close(win, true)
+    end
+  end, { buffer = buff })
+end
+
 return {
   "rmagatti/goto-preview",
   event = "BufEnter",
@@ -12,12 +20,12 @@ return {
       vim.keymap.set("n", "<C-up>", "<C-w>-", { buffer = true })
       vim.keymap.set("n", "<C-down>", "<C-w>+", { buffer = true })
 
-      -- Close one buffer at a time
-      vim.keymap.set("n", "<Esc>", function()
-        if vim.api.nvim_win_is_valid(win) then
-          vim.api.nvim_win_close(win, true)
-        end
-      end, { buffer = buff })
+      -- Bind multiple keys to close one buffer at a time
+      bind_close_buffer("<Esc>", buff, win)
+      bind_close_buffer("q", buff, win)
     end,
   },
+  keys = {
+    { "gp", function() require("goto-preview").goto_preview_definition() end, desc = "Goto Preview Definition" },
+  }
 }

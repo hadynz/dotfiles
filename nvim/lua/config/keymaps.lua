@@ -4,7 +4,6 @@
 M = {}
 
 local wk = require("which-key")
-local telescope_builtin_utils = require("telescope.builtin")
 
 -- Custom keymap function that checks if a lazy keys handler exists before creating a keymap
 -- @see https://github.com/aserowy/tmux.nvim/issues/92#issuecomment-1873710733
@@ -20,21 +19,42 @@ local function map(mode, lhs, rhs, opts)
   end
 end
 
+local function toggle_it_only()
+  local line = vim.api.nvim_get_current_line() -- Get the current line in the buffer
+  -- If the line contains 'it.only', replace with `it`
+  if line:match("^%s*it%.only%s*%(") then
+    line = line:gsub("it%.only", "it")
+  -- If line contains `it`, replace with `it.only`
+  elseif line:match("^%s*it%s*%(") then
+    -- Replace 'it' with 'it.only'
+    line = line:gsub("it", "it.only", 1)
+  else
+    return
+  end
+  vim.api.nvim_set_current_line(line) -- Set the modified line back to the buffer
+end
+
 -- Delete global LazyVim keymaps
 vim.keymap.del({ "n" }, "<leader>l")
 vim.keymap.del({ "n" }, "<leader>L")
 
+-- Window navigation
+map("n", "<leader>w\\", "<C-w>v", { desc = "Split vertical" })
+map("n", "<leader>w-", "<C-w>s", { desc = "Split horizontal" })
+
 -- LazyVim distro keymaps
 wk.add({ "<leader>L", group = "LazyVim" })
 map("n", "<leader>Ll", "<cmd>Lazy<CR>", { desc = "Lazy" })
-map("n", "<leader>LL", function() LazyVim.news.changelog() end, { desc = "LazyVim Changelog" })
+map("n", "<leader>LL", function()
+  LazyVim.news.changelog()
+end, { desc = "LazyVim Changelog" })
 
 -- Redo
 map("n", "U", "<C-r>", { desc = "Redo" })
 
 -- Navigate back and forth
-map("n", "<C-[>", "<C-o>", { desc = "Navigate back" })
-map("n", "<C-]>", "<C-i>", { desc = "Navigate forward" })
+map("n", "<C-[>", "<C-O>", { desc = "Navigate back" })
+map("n", "<C-]>", "<C-I>", { desc = "Navigate forward" })
 
 -- Switch back and forth between last 2 buffers
 map("n", "ge", "<cmd>b#<CR>", { desc = "Switch back" })
@@ -63,10 +83,52 @@ map("n", "s", "<nop>", { desc = "Disable default `s` keybind" })
 -- Select more lines in visual mode - e.g. VV for 2 lines, VVV for 3 lines
 map("x", "V", "j")
 
+-- Backspace deletes current word in normal mode. Checks if there is a dot before the current word. If there is, it deletes the dot as well.
+function delete_word_with_dots()
+  -- Get the current cursor position and line
+  local pos = vim.api.nvim_win_get_cursor(0)
+  local line = vim.api.nvim_get_current_line()
+  local col = pos[2] -- 0-based column index
+
+  vim.notify(vim.inspect(pos), nil, { title = "🖨️ pos", ft = "lua" })
+  vim.notify(vim.inspect(line), nil, { title = "🖨️ line", ft = "lua" })
+  vim.notify(vim.inspect(col), nil, { title = "🖨️ col", ft = "lua" })
+
+  -- Use Vim's built-in word boundaries to find the start and end of the current word
+  vim.fn.cursor(pos[1], col + 1) -- Move to 1-based for Vim functions
+  local start_col = vim.fn.col("b") - 1 -- Move to start of word (0-based)
+  local end_col = vim.fn.col("e") - 1 -- Move to end of word (0-based)
+
+  -- Adjust start_col to include one preceding dot, if it exists
+  if start_col > 0 and line:sub(start_col, start_col) == "." then
+    start_col = start_col - 1
+  end
+
+  -- Adjust end_col to include one following dot, if it exists
+  if end_col < #line - 1 and line:sub(end_col + 2, end_col + 2) == "." then
+    end_col = end_col + 1
+  end
+
+  print(vim.inspect("start_col " .. start_col))
+  print(vim.inspect("end_col " .. end_col))
+
+  -- Delete the precise range (start_col to end_col, inclusive)
+  vim.api.nvim_buf_set_text(0, pos[1] - 1, start_col, pos[1] - 1, end_col + 1, { "" })
+
+  -- Restore cursor position to avoid jumping
+  vim.api.nvim_win_set_cursor(0, { pos[1], start_col })
+end
+map("n", "<BS>", delete_word_with_dots, { desc = "Delete current word", noremap = true, silent = true })
+
+-- Testing
+map("n", "<Leader>tr", "<cmd>:TestNearest<cr>", { desc = "Run test" })
+map("n", "<leader>td", "<cmd>:%s/\\<it\\.only\\>/it/g<cr>``", { desc = "Delete `it.only` in file" })
+map("n", "<leader>ti", toggle_it_only, { desc = "Toggle `it.only` on line", noremap = true, silent = true })
+
 -- Clear highlight of search, messages, floating windows
 map({ "n", "i" }, "<Esc>", function()
-  vim.cmd([[nohl]])                                 -- clear highlight of search
-  vim.cmd([[stopinsert]])                           -- clear messages (the line below statusline)
+  vim.cmd([[nohl]]) -- clear highlight of search
+  vim.cmd([[stopinsert]]) -- clear messages (the line below statusline)
   for _, win in ipairs(vim.api.nvim_list_wins()) do -- clear all floating windows
     if vim.api.nvim_win_get_config(win).relative == "win" then
       vim.api.nvim_win_close(win, false)
@@ -112,14 +174,6 @@ map("n", "dd", function()
   end
 end, { expr = true })
 
--- Console Log snippet
-vim.api.nvim_set_keymap("i", "cll", "console.log();<ESC>F(a", { noremap = false, silent = true })
-vim.api.nvim_set_keymap("n", "cll", "yiw%ocll'<Esc>pla, <Esc>p2b", { noremap = false, silent = true })
-
--- Yank History Picker
-map("n", "<Leader>p", "<cmd>Telescope yank_history theme=cursor previewer=false<cr>", { desc = "Yank History Picker" })
-map("i", "<C-r>", "<cmd>Telescope yank_history theme=cursor previewer=false<cr>", { desc = "Yank History Picker" })
-
 -- In insert mode, either move cursor right, or trigger next copilot suggestion
 local move_right = function()
   local copilot = require("copilot.suggestion")
@@ -148,18 +202,15 @@ map("i", "<C-k>", "<Up>", { desc = "Move cursor up" })
 map("i", "<C-l>", move_right, { desc = "Move cursor right" })
 
 -- LSP keymaps
-map("n", "gr", telescope_builtin_utils.lsp_references, { desc = "Find all references" })
+-- map("n", "gr", telescope_builtin_utils.lsp_references, { desc = "Find all references" })
+map("n", "gR", vim.lsp.buf.rename, { desc = "Rename" })
+map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "[R]e[n]ame" })
 map("n", "gA", LazyVim.lsp.action.source, { desc = "Source Action" })
 map("n", "gh", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
 map("n", "go", LazyVim.lsp.action["source.organizeImports"], { desc = "Format" })
-map("n", "==", vim.lsp.buf.format, { desc = "Format" })
-
--- LSP keymap previews
-map("n", "gp", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", { noremap = true })
-
--- Diagnostics
-map("n", "<M-j>", vim.diagnostic.goto_next, { desc = "Next Diagnostic" })
-map("n", "<A-k>", vim.diagnostic.goto_prev, { desc = "Prev Diagnostic" })
+map({ "n", "v" }, "==", function()
+  LazyVim.format({ force = true })
+end, { desc = "Format" })
 
 -- Git
 map("n", "<Leader>gr", "<cmd>GitLink! default_branch<CR>", { desc = "Open Remote File (main)" })
@@ -167,33 +218,14 @@ map("n", "<Leader>gR", "<cmd>GitLink!<CR>", { desc = "Open Remote File" })
 map("n", "<Leader>gB", "<cmd>GitLink! blame<CR>", { desc = "Open Remote File with Blame" })
 
 -- Before/After
-map("n", "[o", "m`O<esc>d0x``", { desc = "Empty line above" })        -- new line before
-map("n", "]o", "m`o<esc>d0x``", { desc = "Empty line below" })        -- new line after
+map("n", "[o", "m`O<esc>d0x``", { desc = "Empty line above" }) -- new line before
+map("n", "]o", "m`o<esc>d0x``", { desc = "Empty line below" }) -- new line after
 map("n", "<Leader>O", "m`O<esc>d0x``", { desc = "Empty line above" }) -- new line before
 map("n", "<Leader>o", "m`o<esc>d0x``", { desc = "Empty line below" }) -- new line after
-map("n", "[p", "m`P``", { desc = "Paste before" })                    -- paste before
+map("n", "[p", "m`P``", { desc = "Paste before" }) -- paste before
 
 -- No yank on visual paste
 map("v", "p", "P", { noremap = true, silent = true })
-
--- Telescope
-map("n", "<C-p>", telescope_builtin_utils.find_files, { desc = "Find File" }) -- iTerm maps Cmd+p to Ctrl+p
-map("n", "<Leader>a", telescope_builtin_utils.commands, { desc = "Find Action" })
-map("n", "<Leader>r", "<cmd>Telescope oldfiles<cr>", { desc = "Recent Files" })
-map("n", "<Leader>/", "<cmd>Telescope live_grep_args<cr>", { desc = "Live Grep (Args)" })
-
--- Testing
-map("n", "<Leader>tr", "<cmd>:TestNearest<cr>", { desc = "Run test" })
-
--- TMUX navigation
-map("n", "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", { desc = "Go to left window" })
-map("n", "<C-j>", "<cmd>lua require'smart-splits'.move_cursor_down()<cr>", { desc = "Go to lower window" })
-map("n", "<C-k>", "<cmd>lua require'smart-splits'.move_cursor_up()<cr>", { desc = "Go to upper window" })
-map("n", "<C-l>", "<cmd>lua require'smart-splits'.move_cursor_right()<cr>", { desc = "Go to right window" })
-map("n", "<C-Up>", "<cmd>lua require'smart-splits'.resize_up()<cr>", { desc = "Resize top" })
-map("n", "<C-Down>", "<cmd>lua require'smart-splits'.resize_down()<cr>", { desc = "Resize bottom" })
-map("n", "<C-Left>", "<cmd>lua require'smart-splits'.resize_left()<cr>", { desc = "Resize left" })
-map("n", "<C-Right>", "<cmd>lua require'smart-splits'.resize_right()<cr>", { desc = "Resize right" })
 
 -- Mouse selection copies to clipboard
 map("v", "<LeftRelease>", '"*ygv', { desc = "Mouse selection copies to clipboard" })
@@ -217,12 +249,17 @@ local resolve_file_path = function()
     choice_callback
   )
 end
+
 map("n", "<Leader>yf", resolve_file_path, { desc = "Copy File Path" })
 
-function M.setup_copilot_keymaps()
-  return {
-    { "<leader>ap", ":Copilot panel<CR>", desc = "Copilot panel" },
-  }
-end
+--- TMUX navigation
+map("n", "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", { desc = "Go to left window" })
+map("n", "<C-j>", "<cmd>lua require'smart-splits'.move_cursor_down()<cr>", { desc = "Go to lower window" })
+map("n", "<C-k>", "<cmd>lua require'smart-splits'.move_cursor_up()<cr>", { desc = "Go to upper window" })
+map("n", "<C-l>", "<cmd>lua require'smart-splits'.move_cursor_right()<cr>", { desc = "Go to right window" })
+map("n", "<C-Up>", "<cmd>lua require'smart-splits'.resize_up()<cr>", { desc = "Resize top" })
+map("n", "<C-Down>", "<cmd>lua require'smart-splits'.resize_down()<cr>", { desc = "Resize bottom" })
+map("n", "<C-Left>", "<cmd>lua require'smart-splits'.resize_left()<cr>", { desc = "Resize left" })
+map("n", "<C-Right>", "<cmd>lua require'smart-splits'.resize_right()<cr>", { desc = "Resize right" })
 
 return M

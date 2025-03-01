@@ -11,4 +11,5 @@ return {
   { "lukas-reineke/indent-blankline.nvim", enabled = false },
   { "folke/flash.nvim", enabled = false }, -- Disable flash; go all in on hop
   { "SmiteshP/nvim-navic", enabled = false }, -- Disable LSP code context in statusline
+  { "echasnovski/mini.diff", enabled = false }, -- Conflicts with gitsigns (folk's config)
 }

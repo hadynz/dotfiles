@@ -20,3 +20,7 @@ opt.listchars:append("trail:~")
 -- Turn on spell checking
 opt.spell = true
 opt.spelllang = "en_nz"
+
+-- Recommended setting by avante.nvim for views
+-- @see https://github.com/yetone/avante.nvim
+opt.laststatus = 3
