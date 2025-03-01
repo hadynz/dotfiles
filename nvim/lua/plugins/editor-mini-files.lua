@@ -11,9 +11,8 @@ return {
   "echasnovski/mini.files",
   version = "*",
   config = function()
-    local f = require("utils.mini-files-extra-bindings")
-    require("utils.mini-files-git-integration")
-
+    local f = require("utils.mini-files.extra-bindings")
+    require("utils.mini-files.git-integration")
     require("mini.files").setup({
       content = {
         filter = f.filter_hide,
