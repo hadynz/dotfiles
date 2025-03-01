@@ -40,7 +40,7 @@ return {
     { "<leader><leader>r", function() Snacks.picker.recent() end, desc = "Recent files" },
 
     -- Scratch
-    { "-", function() require("utils.snacks.scratch").new_scratch(filetypes) end, desc = "Toggle Scratch Buffer" },
-    { "_", function() require("utils.snacks.scratch").select_scratch() end, desc = "Select Scratch Buffer" },
+    { "-", function() require("utils.snacks.scratch").select_scratch() end, desc = "Select Scratch Buffer" },
+    { "_", function() require("utils.snacks.scratch").new_scratch(filetypes) end, desc = "Toggle Scratch Buffer" },
   },
 }

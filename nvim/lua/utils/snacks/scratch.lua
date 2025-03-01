@@ -38,6 +38,7 @@ function M.select_scratch()
   process_items(items)
 
   Snacks.picker.pick({
+    title = "Scratch: Select Buffer",
     source = "scratch",
     items = items,
     format = "text",
@@ -83,6 +84,7 @@ end
 
 function M.new_scratch(filetypes)
   Snacks.picker.pick({
+    title = "New Scratch: Select Filetype",
     source = "scratch",
     items = filetypes,
     format = "text",
