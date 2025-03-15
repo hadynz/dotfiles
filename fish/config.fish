@@ -51,12 +51,12 @@ export ATLASSIAN_VPN_MFA_DEFAULT="push"
 export ATLASSIAN_VPN_SERVER_DEFAULT="APSE2 Sydney (managed)"
 
 # Use VI mode
-#set -g fish_key_bindings fish_vi_key_bindings
+set -g fish_key_bindings fish_vi_key_bindings
 
 # Emulates vim's cursor shape behavior
-#set fish_cursor_default block # Set the normal and visual mode cursors to a block 
-#set fish_cursor_insert line # Set the insert mode cursor to a line 
-#set fish_cursor_replace_one underscore # Set the replace mode cursors to an underscore 
+set fish_cursor_default block # Set the normal and visual mode cursors to a block 
+set fish_cursor_insert line # Set the insert mode cursor to a line 
+set fish_cursor_replace_one underscore # Set the replace mode cursors to an underscore 
 
 # Created by `pipx` on 2024-04-14 22:38:46
 set PATH $PATH /Users/hosman/.local/bin
