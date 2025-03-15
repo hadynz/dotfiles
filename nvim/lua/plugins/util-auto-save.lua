@@ -24,5 +24,6 @@ return {
 
     -- Disable auto-commands to avoid cyclic behaviour with auto-save/auto-format
     noautocmd = true,
+    debounce_delay = 2000,
   },
 }

@@ -3,10 +3,10 @@ return {
     "echasnovski/mini.surround",
     opts = {
       mappings = {
-        add = 'sa',     -- Add surround
-        delete = 'sd',  -- Delete surround
-        replace = 'sr', -- Replace surround
-      }
-    }
-  }
+        add = "ys", -- Add surround
+        delete = "ds", -- Delete surround
+        replace = "cs", -- Replace surround
+      },
+    },
+  },
 }

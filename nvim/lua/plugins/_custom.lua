@@ -4,6 +4,7 @@ return {
   { "linrongbin16/gitlinker.nvim", cmd = "GitLink", opts = {} }, -- Open git files remotely
   { "sitiom/nvim-numbertoggle" }, -- Relative numbers on only for current buffer in Normal mode
   { "chrisgrieser/nvim-early-retirement", config = true, event = "VeryLazy" }, -- Auto-close inactive buffers
+  { "navarasu/onedark.nvim" },
 
   -- Disable Plugins
   { "nvim-neo-tree/neo-tree.nvim", enabled = false }, -- Replaced with mini.files

@@ -4,11 +4,11 @@ return {
     "Wansmer/treesj",
     keys = {
       {
-        "<leader>s",
+        "<leader>j",
         function()
           require("treesj").toggle()
         end,
-        desc = "󰗈 Split-join lines",
+        desc = "Toggle Split/Join lines",
       },
     },
     opts = {

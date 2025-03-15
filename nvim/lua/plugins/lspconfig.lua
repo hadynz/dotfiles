@@ -64,8 +64,7 @@ return {
       keys[#keys + 1] = { "<c-k>", false, mode = "i" }
 
       -- Override defaults to replace with custom keymapping
-      keys[#keys + 1] = { "gr", false, mode = "n" } -- Rename; replace to use inc-rename
-      keys[#keys + 1] = { "K", false, mode = "n" }  -- Hover; replace to use hover.nvim
+      keys[#keys + 1] = { "K", false, mode = "n" } -- Hover; replace to use hover.nvim
       keys[#keys + 1] = { "gK", false, mode = "n" } -- Hover (signature help); replace to use hover.nvim
     end,
   },

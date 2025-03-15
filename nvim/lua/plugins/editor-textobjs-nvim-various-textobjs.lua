@@ -1,14 +1,19 @@
 return {
   {
     "chrisgrieser/nvim-various-textobjs",
+    enabled = false,
     config = function()
       require("various-textobjs").setup({
-        useDefaultKeymaps = false,
+        keymaps = {
+          useDefaults = false,
+        }
       })
 
       -- Sub word (text object for camel-case, words split by `-` or `_`)
       vim.keymap.set({ "o", "x" }, "iS", "<cmd>lua require('various-textobjs').subword('inner')<CR>")
       vim.keymap.set({ "o", "x" }, "aS", "<cmd>lua require('various-textobjs').subword('outer')<CR>")
+      vim.keymap.set({ "o", "x" }, "iC", "<cmd>lua require('various-textobjs').subword('inner')<CR>")
+      vim.keymap.set({ "o", "x" }, "aC", "<cmd>lua require('various-textobjs').subword('outer')<CR>")
 
       -- Key
       vim.keymap.set({ "o", "x" }, "ik", "<cmd>lua require('various-textobjs').key('inner')<CR>")

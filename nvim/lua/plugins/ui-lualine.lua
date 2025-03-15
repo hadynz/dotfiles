@@ -18,15 +18,4 @@ return {
       },
     },
   },
-
-  -- Harpoon lua line indicator with pretty icon
-  {
-    "letieu/harpoon-lualine",
-    dependencies = {
-      {
-        "ThePrimeagen/harpoon",
-        branch = "harpoon2",
-      },
-    },
-  },
 }

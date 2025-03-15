@@ -33,20 +33,6 @@ return {
     })
   end,
   keys = {
-    {
-      "<leader>E",
-      function()
-        local lazyvimRoot = require("lazyvim.util.root")
-        toggle_minifiles(lazyvimRoot.git(), true)
-      end,
-      desc = "Open mini.files (Git dir)",
-    },
-    {
-      "<leader>e",
-      function()
-        toggle_minifiles(vim.api.nvim_buf_get_name(0), true)
-      end,
-      desc = "Open mini.files (Cwd)",
-    },
+    { "<leader>e", function() toggle_minifiles(vim.api.nvim_buf_get_name(0), true) end, desc = "Open mini.files (Cwd)" },
   },
 }

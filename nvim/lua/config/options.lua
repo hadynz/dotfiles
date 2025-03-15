@@ -24,3 +24,6 @@ opt.spelllang = "en_nz"
 -- Recommended setting by avante.nvim for views
 -- @see https://github.com/yetone/avante.nvim
 opt.laststatus = 3
+
+-- Highlight current line
+opt.cursorline = true

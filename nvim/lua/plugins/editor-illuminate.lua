@@ -1,5 +1,7 @@
 return {
+  -- Highlight all instances of the word under the cursor
   "RRethy/vim-illuminate",
+  enabled = true,
   event = "LazyFile",
 
   -- Override folke's default config to add centering!
