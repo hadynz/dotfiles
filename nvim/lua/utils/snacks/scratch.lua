@@ -98,10 +98,11 @@ function M.new_scratch(filetypes)
         picker:close()
         vim.schedule(function()
           local items = picker:items()
+          local name = "Scratch (" .. os.time(os.date("!*t")) .. ")" -- Make name unique (using timestamp) to avoid conflicts
           if #items == 0 then
-            Snacks.scratch({ ft = picker:filter().pattern })
+            Snacks.scratch({ ft = picker:filter().pattern, name = name })
           else
-            Snacks.scratch({ ft = item.text })
+            Snacks.scratch({ ft = item.text, name = name })
           end
         end)
       end,
