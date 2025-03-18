@@ -2,6 +2,7 @@ return {
   -- Split/Join lines
   {
     "Wansmer/treesj",
+    cond = true,
     keys = {
       {
         "<leader>j",

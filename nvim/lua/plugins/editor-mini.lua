@@ -1,6 +1,7 @@
 return {
   {
     "echasnovski/mini.surround",
+    cond = true,
     opts = {
       mappings = {
         add = "ys", -- Add surround

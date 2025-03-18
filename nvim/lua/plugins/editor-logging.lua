@@ -3,17 +3,20 @@ return {
   {
     "chrisgrieser/nvim-chainsaw",
     event = "VeryLazy",
+    cond = true,
     init = function()
-      local wk = require("which-key")
-      wk.add({ "<leader>l", group = "Logging" })
+      if not vim.g.vscode then
+        local wk = require("which-key")
+        wk.add({ "<leader>l", group = "+logging" })
+      end
     end,
     opts = {
       marker = "🖨️",
       logStatements = {
         objectLog = {
           typescript = "console.log('{{marker}} {{var}}:', JSON.stringify({{var}}, null, 2));",
-        }
-      }
+        },
+      },
     },
     cmd = "ChainSaw",
     keys = {
