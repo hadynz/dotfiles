@@ -91,78 +91,18 @@ return {
     { "<leader>S", false },
 
     -- Picker
-    {
-      "<F5>",
-      function()
-        Snacks.picker.smart()
-      end,
-      desc = "Smart Find Files",
-    },
-    {
-      "<C-p>",
-      function()
-        Snacks.picker.smart()
-      end,
-      desc = "Smart Find Files",
-    },
-    {
-      "<leader>.",
-      function()
-        Snacks.picker.grep_word()
-      end,
-      desc = "Grep word under cursor",
-    },
-    {
-      "<leader>E",
-      function()
-        Snacks.explorer()
-      end,
-      desc = "Show explorer",
-    },
-    {
-      "<leader>gt",
-      function()
-        Snacks.picker.git_status()
-      end,
-      desc = "List modified git files",
-    },
-    {
-      "<leader><leader>g",
-      function()
-        Snacks.picker.git_status()
-      end,
-      desc = "List modified git files",
-    },
-    {
-      "<leader><leader>b",
-      function()
-        Snacks.picker.buffers()
-      end,
-      desc = "Open buffers",
-    },
-    {
-      "<leader><leader>r",
-      function()
-        Snacks.picker.recent()
-      end,
-      desc = "Recent files",
-    },
+    { "<F5>", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
+    { "<C-p>", function() Snacks.picker.smart() end, desc = "Smart Find Files" },
+    { "<leader>.", function() Snacks.picker.grep_word() end, desc = "Grep word under cursor" },
+    { "<leader>E", function() Snacks.explorer() end, desc = "Show explorer" },
+    { "<leader>gt", function() Snacks.picker.git_status() end, desc = "List modified git files" },
+    { "<leader><leader>g", function() Snacks.picker.git_status() end, desc = "List modified git files" },
+    { "<leader><leader>b", function() Snacks.picker.buffers() end, desc = "Open buffers" },
+    { "<leader><leader>r", function() Snacks.picker.recent() end, desc = "Recent files" },
     { "<leader>sx", grep_current_buffer_dirs, desc = "Grep (current Buffer Dirs)" },
 
     -- Scratch
-    {
-      "<F9>",
-      function()
-        require("utils.snacks.scratch").select_scratch()
-      end,
-      desc = "Select Scratch Buffer",
-    },
-    {
-      "<F10>",
-      function()
-        require("utils.snacks.scratch").new_scratch(filetypes)
-      end,
-      desc = "Toggle Scratch Buffer",
-    },
+    { "<F9>", function() require("utils.snacks.scratch").new_scratch(filetypes) end, desc = "Toggle Scratch Buffer" },
+    { "<F10>", function() require("utils.snacks.scratch").select_scratch() end, desc = "Select Scratch Buffer" },
   },
 }
