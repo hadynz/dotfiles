@@ -1,5 +1,8 @@
 return {
   "saghen/blink.cmp",
-  -- version = false,
-  -- build = "cargo build --release",
+  opts = {
+    keymap = {
+      preset = "super-tab",
+    },
+  },
 }
