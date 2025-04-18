@@ -19,7 +19,6 @@ return {
       },
       mappings = {
         close = "<Esc>",
-        go_out = "-",
         go_in_plus = "<CR>",
         show_help = "?",
       },
@@ -34,6 +33,12 @@ return {
     })
   end,
   keys = {
-    { "<leader>e", function() toggle_minifiles(vim.api.nvim_buf_get_name(0), true) end, desc = "Open mini.files (Cwd)" },
+    {
+      "<leader>e",
+      function()
+        toggle_minifiles(vim.api.nvim_buf_get_name(0), true)
+      end,
+      desc = "Open mini.files (Cwd)",
+    },
   },
 }
