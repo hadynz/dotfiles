@@ -49,6 +49,7 @@ alias glog="git log --oneline --graph --decorate --all"
 # Atlassian Dev variables
 export ATLASSIAN_VPN_MFA_DEFAULT="push"
 export ATLASSIAN_VPN_SERVER_DEFAULT="APSE2 Sydney (managed)"
+set PATH $PATH $HOME/.jenv/bin # Configuring for Jenv. Required for acra-mini
 
 # Use VI mode
 set -g fish_key_bindings fish_vi_key_bindings
