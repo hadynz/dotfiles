@@ -19,6 +19,7 @@ return {
       },
       mappings = {
         close = "<Esc>",
+        go_out = "-",
         go_in_plus = "<CR>",
         show_help = "?",
       },

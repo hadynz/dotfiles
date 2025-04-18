@@ -57,7 +57,7 @@ vim.api.nvim_create_autocmd("User", {
     vim.keymap.set("n", "go", open_current_directory, { buffer = buf_id })
     vim.keymap.set("n", "q", MiniFiles.close, { buffer = buf_id })
 
-    map_split(buf_id, "-", "belowright horizontal")
+    -- map_split(buf_id, "-", "belowright horizontal")
     map_split(buf_id, "\\", "belowright vertical")
   end,
 })
