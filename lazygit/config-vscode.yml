@@ -1,0 +1,5 @@
+# @see: https://marketplace.visualstudio.com/items?itemName=TomPollak.lazygit-vscode
+os:
+  editPreset: "cursor"
+promptToReturnFromSubprocess: false # removes "press enter to return to lazygit" popup
+

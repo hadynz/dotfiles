@@ -19,9 +19,21 @@ local function v_notify(cmd)
   return string.format("<cmd>call VSCodeNotifyVisual('%s', 1)<cr>", cmd)
 end
 
--- File operations
-keymap("n", "<leader>w", notify("workbench.action.files.save"), { silent = true })
-keymap("n", "<leader>q", notify("workbench.action.closeActiveEditor"), { silent = true })
+-- Editor
+keymap("n", "u", notify("undo"), { silent = true })
+keymap("n", "U", notify("redo"), { silent = true })
+keymap("n", "==", notify("editor.action.formatDocument"), { silent = true })
+
+-- New lines
+keymap("n", "]o", notify("editor.action.insertLineAfter"), { silent = true })
+keymap("n", "[o", notify("editor.action.insertLineBefore"), { silent = true })
+keymap("n", "<leader>o", notify("editor.action.insertLineAfter"), { silent = true })
+keymap("n", "<leader>O", notify("editor.action.insertLineBefore"), { silent = true })
+
+-- Testing
+keymap("n", "<leader>tr", notify("extension.runJest"), { silent = true })
+keymap("n", "<leader>tl", notify("extension.runPrevJest"), { silent = true })
+keymap("n", "<leader>tn", notify("extension.debugJest"), { silent = true })
 
 -- Navigation
 keymap("n", "<F5>", notify("workbench.action.quickOpen"), { silent = true })
@@ -53,31 +65,26 @@ keymap("n", "<leader>8", notify("vscode-harpoon.gotoEditor8"), { silent = true }
 keymap("n", "<leader>9", notify("vscode-harpoon.gotoEditor9"), { silent = true })
 
 -- UI toggles
-keymap("n", "<leader>e", notify("workbench.files.action.focusFilesExplorer"), { silent = true })
+keymap("n", "<leader>e", notify("voil.openPanelCurrentDir"), { silent = true })
+keymap("n", "<leader>E", notify("workbench.files.action.focusFilesExplorer"), { silent = true })
 keymap("n", "<leader>th", notify("workbench.action.toggleActivityBarVisibility"), { silent = true })
 keymap("n", "<leader>tp", notify("workbench.action.togglePanel"), { silent = true })
 keymap("n", "<leader>tt", notify("workbench.action.terminal.toggleTerminal"), { silent = true })
 keymap("n", "<leader>zz", notify("workbench.action.toggleZenMode"), { silent = true })
 
+-- Splits
+keymap("n", "<leader>w-", notify("workbench.action.splitEditorOrthogonal"), { silent = true })
+keymap("n", "<leader>w\\", notify("workbench.action.splitEditor"), { silent = true })
+keymap("n", "<leader>wq", notify("workbench.action.closeEditorsAndGroup"), { silent = true })
+
 -- Code actions
 keymap("n", "ga", notify("editor.action.quickFix"), { silent = true })
-keymap("n", "gd", notify("editor.action.revealDefinition"), { silent = true })
-keymap("n", "gD", notify("editor.action.revealDeclaration"), { silent = true })
-keymap("n", "gy", notify("editor.action.goToTypeDefinition"), { silent = true })
 keymap("n", "gi", notify("editor.action.goToImplementation"), { silent = true })
 keymap("n", "gr", notify("editor.action.goToReferences"), { silent = true })
 keymap("n", "go", notify("editor.action.organizeImports"), { silent = true })
 keymap("n", "<leader>rn", notify("editor.action.rename"), { silent = true })
+keymap("n", "<leader>ra", notify("editor.action.refactor"), { silent = true })
 keymap("n", "<leader>cn", notify("editor.action.rename"), { silent = true })
-keymap("n", "gcc", notify("editor.action.commentLine"), { silent = true })
-keymap("v", "gc", notify("editor.action.commentLine"), { silent = true })
-keymap("v", "<leader>fm", v_notify("editor.action.formatSelection"), { silent = true })
-keymap("v", "<leader>ca", v_notify("editor.action.refactor"), { silent = true })
-vim.keymap.set({ "n", "x" }, "<leader>r", function()
-  vscode.with_insert(function()
-    vscode.action("editor.action.refactor")
-  end)
-end)
 
 -- fold support
 keymap("n", "zM", notify("editor.foldAll"), { silent = true })
@@ -90,16 +97,12 @@ keymap("n", "za", notify("editor.toggleFold"), { silent = true })
 
 -- Git
 keymap("n", "<leader>gc", notify("git.viewChanges"), { silent = true })
+keymap("n", "<leader>gg", notify("lazygit-vscode.toggle"), { silent = true })
 
 -- Specialized features
-keymap("n", "<leader>aa", notify("workbench.panel.chat"), { silent = true })
+keymap("n", "<leader>aa", notify("aichat.focuschatpaneaction"), { silent = true })
+keymap("n", "<leader>an", notify("composer.createNew"), { silent = true })
 keymap("n", "<leader>md", notify("markdown.showPreview"), { silent = true })
-
--- Selecting
-vim.keymap.set({ "n", "v" }, "<leader>ss", function()
-  vscode.action("editor.action.smartSelect.expand")
-end)
--- select all <leader>sa
-keymap("n", "<leader>sa", notify("editor.action.selectAll"), { silent = true })
+keymap("n", "<leader>uz", notify("workbench.action.toggleZenMode"), { silent = true })
 
 return M
