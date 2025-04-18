@@ -7,6 +7,11 @@ return {
         floating_wins = false,
       },
       render = function(props)
+        -- Don't render anything if cursor is on the first line
+        if props.win and vim.api.nvim_win_get_cursor(props.win)[1] == 1 then
+          return {}
+        end
+
         local render = {}
         local bufname = vim.api.nvim_buf_get_name(props.buf)
 
@@ -22,6 +27,16 @@ return {
 
         local modified = vim.api.nvim_buf_get_option(props.buf, "modified") and "bold,italic" or "None"
         local filetype_icon, color = require("nvim-web-devicons").get_icon_color(filename)
+
+        -- Check if window is narrow (less than 50 columns)
+        local win_width = vim.api.nvim_win_get_width(props.win)
+        local is_narrow = win_width < 90
+
+        if is_narrow then
+          -- If narrow, show only the filename
+          table.insert(render, { filename, gui = modified })
+          return render
+        end
 
         local buffer = {
           { filetype_icon, guifg = color },
