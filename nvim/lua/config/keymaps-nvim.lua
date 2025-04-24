@@ -38,6 +38,9 @@ end
 vim.keymap.del({ "n" }, "<leader>l")
 vim.keymap.del({ "n" }, "<leader>L")
 
+-- Duplicate line and comment first line
+map("n", "ycc", "yygccp", { remap = true })
+
 -- Window navigation
 map("n", "<leader>w\\", "<C-w>v", { desc = "Split vertical" })
 map("n", "<leader>w-", "<C-w>s", { desc = "Split horizontal" })

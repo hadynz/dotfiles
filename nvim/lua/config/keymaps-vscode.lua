@@ -24,6 +24,13 @@ keymap("n", "u", notify("undo"), { silent = true })
 keymap("n", "U", notify("redo"), { silent = true })
 keymap("n", "==", notify("editor.action.formatDocument"), { silent = true })
 
+-- Duplicate line and comment first line
+vim.keymap.set("n", "ycc", function()
+  vim.cmd("normal! yy")
+  vscode.call("editor.action.commentLine")
+  vim.cmd("normal! p")
+end, { noremap = true, silent = true })
+
 -- New lines
 keymap("n", "]o", notify("editor.action.insertLineAfter"), { silent = true })
 keymap("n", "[o", notify("editor.action.insertLineBefore"), { silent = true })
