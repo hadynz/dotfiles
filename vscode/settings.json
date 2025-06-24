@@ -1,0 +1,99 @@
+{
+  "security.workspace.trust.enabled": true,
+  "yaml.schemas": {
+    "file:///Users/hosman/.cursor/extensions/atlassian.atlascode-3.8.3/resources/schemas/pipelines-schema.json": "bitbucket-pipelines.yml"
+  },
+  "snyk.advanced.cliPath": "/Users/hosman/Library/Application Support/snyk/vscode-cli/snyk-macos-arm64",
+  "snyk.folderConfigs": [
+    {
+      "folderPath": "/Users/hosman/Development/Personal/my-app",
+      "baseBranch": "main",
+      "localBranches": [
+        "main",
+        "anchor-space-mgt-swift",
+        "module-architecture-auto-ipc-bindings",
+        "swift-rewrite"
+      ]
+    }
+  ],
+  "snyk.yesWelcomeNotification": false,
+  "snyk.trustedFolders": [
+    "/Users/hosman/atlassian/canvas",
+    "/Users/hosman/Development/Personal/project-grendizer",
+    "/Users/hosman/Development/Personal/my-app",
+    "/Users/hosman/atlassian/cc-notifications"
+  ],
+  "extensions.experimental.affinity": {
+    "asvetliakov.vscode-neovim": 1
+  },
+  "redhat.telemetry.enabled": false,
+  "workbench.colorTheme": "Tokyo Night Storm",
+  "workbench.colorCustomizations": {
+    "terminal.background": "#2f3448",
+    "[Tokyo Night Storm]": {
+      "terminal.background": "#2f3448"
+      // "editor.background": "#353c50"
+    }
+  },
+  "files.autoSave": "afterDelay",
+  "workbench.editor.showTabs": "single",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "workbench.activityBar.orientation": "vertical",
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.accessibilitySupport": "off",
+  "vscode-neovim.compositeKeys": {},
+  "workbench.sideBar.location": "right",
+  "editor.lineNumbers": "relative",
+  "editor.fontVariations": true,
+  "editor.renderWhitespace": "all",
+  "editor.fontLigatures": true,
+  "editor.lineHeight": 1.55,
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "git.enableSmartCommit": true,
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "editor.fontFamily": "'JetbrainsMono NFM Light', Menlo, Monaco, 'Courier New', monospace",
+  "editor.fontSize": 12.5,
+  "zenMode.centerLayout": false,
+  "zenMode.fullScreen": false,
+  "zenMode.hideLineNumbers": false,
+  "zenMode.showTabs": "none",
+  "zenMode.silentNotifications": false,
+  "workbench.editor.editorActionsLocation": "titleBar",
+  "extensions.ignoreRecommendations": true,
+  "terminal.integrated.commandsToSkipShell": [
+    "workbench.action.navigateLeft",
+    "workbench.action.navigateRight"
+  ],
+  "find-it-faster.general.useTerminalInEditor": true,
+  "lazygit-vscode.autoMaximizeWindow": true,
+  "lazygit-vscode.configPath": "/Users/hosman/Development/Personal/dotfiles/lazygit/config-vscode.yml",
+  "lazygit-vscode.panels": {
+    "sidebar": "hide"
+  },
+  "terminal.integrated.enableMultiLinePasteWarning": false,
+  "svelte.enable-ts-plugin": true,
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.multiCursorModifier": "ctrlCmd",
+  "terminal.external.osxExec": "WezTerm.app",
+  "terminal.explorerKind": "external",
+  "terminal.integrated.env.osx": {
+    "FIG_NEW_SESSION": "1"
+  },
+  "cursor.composer.shouldChimeAfterChatFinishes": true,
+  "git.confirmSync": false,
+  "diffEditor.ignoreTrimWhitespace": false
+}

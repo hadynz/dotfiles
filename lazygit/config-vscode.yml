@@ -1,5 +1,9 @@
 # @see: https://marketplace.visualstudio.com/items?itemName=TomPollak.lazygit-vscode
 os:
-  editPreset: "cursor"
+  edit: 'cursor {{filename}}'
+  editAtLine: 'cursor --goto "{{filename}}:{{line}}"'
+  editAtLineAndWait: 'cursor --goto "{{filename}}:{{line}}"'
+  editInTerminal: true
+  openDirInEditor: 'cursor {{dir}}'
 promptToReturnFromSubprocess: false # removes "press enter to return to lazygit" popup
 

@@ -20,6 +20,8 @@ local function v_notify(cmd)
 end
 
 -- Editor
+keymap("n", "j", "gj", { silent = true }) -- Enables movement over code folds
+keymap("n", "k", "gk", { silent = true }) -- Enables movement over code folds
 keymap("n", "u", notify("undo"), { silent = true })
 keymap("n", "U", notify("redo"), { silent = true })
 keymap("n", "==", notify("editor.action.formatDocument"), { silent = true })
@@ -39,7 +41,7 @@ keymap("n", "<leader>O", notify("editor.action.insertLineBefore"), { silent = tr
 
 -- Testing
 keymap("n", "<leader>tr", notify("extension.runJest"), { silent = true })
-keymap("n", "<leader>tl", notify("extension.runPrevJest"), { silent = true })
+keymap("n", "<leader>td", notify("extension.debugJest"), { silent = true })
 keymap("n", "<leader>tn", notify("extension.debugJest"), { silent = true })
 
 -- Navigation
@@ -49,9 +51,9 @@ keymap("n", "<leader><leader>r", notify("workbench.action.openRecent"), { silent
 keymap("n", "<leader>fr", notify("workbench.action.openRecent"), { silent = true })
 keymap("n", "<leader>fc", notify("workbench.action.showCommands"), { silent = true })
 keymap("v", "<leader>fc", v_notify("workbench.action.showCommands"), { silent = true })
-keymap("n", "<leader>/", notify("periscope.search"), { silent = true })
+keymap("n", "<leader>/", notify("television.ToggleFileFinder"), { silent = true })
 vim.keymap.set("n", "<leader>.", function()
-  vscode.action("workbench.action.findInFiles", {
+  vscode.action("television.ToggleTextFinder", {
     args = {
       query = vim.fn.expand("<cword>"),
     },
@@ -71,6 +73,11 @@ keymap("n", "<leader>7", notify("vscode-harpoon.gotoEditor7"), { silent = true }
 keymap("n", "<leader>8", notify("vscode-harpoon.gotoEditor8"), { silent = true })
 keymap("n", "<leader>9", notify("vscode-harpoon.gotoEditor9"), { silent = true })
 
+-- Bookmarks
+keymap("n", "m`", notify("bookmarks.list"), { silent = true })
+keymap("n", "md", notify("bookmarks.clear"), { silent = true })
+keymap("n", "mm", notify("bookmarks.toggle"), { silent = true })
+
 -- UI toggles
 keymap("n", "<leader>e", notify("voil.openPanelCurrentDir"), { silent = true })
 keymap("n", "<leader>E", notify("workbench.files.action.focusFilesExplorer"), { silent = true })
@@ -88,6 +95,7 @@ keymap("n", "<leader>wq", notify("workbench.action.closeEditorsAndGroup"), { sil
 keymap("n", "ga", notify("editor.action.quickFix"), { silent = true })
 keymap("n", "gi", notify("editor.action.goToImplementation"), { silent = true })
 keymap("n", "gr", notify("editor.action.goToReferences"), { silent = true })
+keymap("n", "gR", notify("references-view.findReferences"), { silent = true })
 keymap("n", "go", notify("editor.action.organizeImports"), { silent = true })
 keymap("n", "<leader>rn", notify("editor.action.rename"), { silent = true })
 keymap("n", "<leader>ra", notify("editor.action.refactor"), { silent = true })
@@ -106,9 +114,13 @@ keymap("n", "za", notify("editor.toggleFold"), { silent = true })
 keymap("n", "<leader>gc", notify("git.viewChanges"), { silent = true })
 keymap("n", "<leader>gg", notify("lazygit-vscode.toggle"), { silent = true })
 
--- Specialized features
+-- AI
 keymap("n", "<leader>aa", notify("aichat.focuschatpaneaction"), { silent = true })
+keymap("i", "<leader>aa", notify("aichat.focuschatpaneaction"), { silent = true })
 keymap("n", "<leader>an", notify("composer.createNew"), { silent = true })
+keymap("i", "<leader>an", notify("composer.createNew"), { silent = true })
+
+-- Specialized features
 keymap("n", "<leader>md", notify("markdown.showPreview"), { silent = true })
 keymap("n", "<leader>uz", notify("workbench.action.toggleZenMode"), { silent = true })
 

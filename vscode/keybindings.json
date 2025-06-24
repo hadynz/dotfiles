@@ -1,0 +1,160 @@
+[
+  // Resize panes using arrow keys
+  {
+    "key": "ctrl+right",
+    "command": "workbench.action.decreaseViewWidth"
+  },
+  {
+    "key": "ctrl+left",
+    "command": "workbench.action.increaseViewWidth"
+  },
+  {
+    "key": "ctrl+up",
+    "command": "workbench.action.decreaseViewHeight"
+  },
+  {
+    "key": "ctrl+down",
+    "command": "workbench.action.increaseViewHeight"
+  },
+
+  // Navigating between panes
+  {
+    "key": "ctrl+h",
+    "command": "workbench.action.navigateLeft",
+    "when": "neovim.mode != 'insert'"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "workbench.action.navigateRight",
+    "when": "neovim.mode != 'insert'"
+  },
+  {
+    "key": "ctrl+k",
+    "command": "workbench.action.navigateUp",
+    "when": "neovim.mode != 'insert'"
+  },
+  {
+    "key": "ctrl+j",
+    "command": "workbench.action.navigateDown",
+    "when": "neovim.mode != 'insert'"
+  },
+
+  // Terminal focus movement
+  {
+    "key": "ctrl+h",
+    "command": "workbench.action.terminal.focusPreviousPane",
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+l",
+    "command": "workbench.action.terminal.focusNextPane",
+    "when": "terminalFocus"
+  },
+
+  // Spawning Terminals
+  {
+    "key": "ctrl+\\",
+    "command": "workbench.action.createTerminalEditorSide",
+    "when": "terminalProcessSupported"
+  },
+  {
+    "key": "ctrl+-",
+    "command": "workbench.action.terminal.split",
+    "when": "terminalProcessSupported"
+  },
+
+  // Increase/Decrease window size
+  {
+    "key": "ctrl+right",
+    "command": "workbench.action.decreaseViewWidth"
+  },
+  {
+    "key": "ctrl+left",
+    "command": "workbench.action.increaseViewWidth"
+  },
+
+  // Navigate back and forth
+  {
+    "key": "cmd+[",
+    "command": "workbench.action.navigateBack"
+  },
+  {
+    "key": "cmd+]",
+    "command": "workbench.action.navigateForward"
+  },
+
+  // Explorer shortcuts
+  {
+    "key": "r",
+    "command": "renameFile",
+    "when": "filesExplorerFocus && foldersViewVisible && !explorerResourceIsRoot && !explorerResourceReadonly && !inputFocus"
+  },
+  {
+    "key": "a",
+    "command": "explorer.newFile",
+    "when": "filesExplorerFocus && foldersViewVisible && !explorerResourceIsRoot && !explorerResourceReadonly && !inputFocus"
+  },
+  {
+    "key": "ctrl+n",
+    "command": "-welcome.showNewFileEntries"
+  },
+
+  // Alt+key passthrough to Neovim
+  {
+    "key": "alt+w",
+    "command": "vscode-neovim.send",
+    "args": "<a-w>",
+    "when": "editorTextFocus && neovim.init"
+  },
+
+  // Voil
+  {
+    "key": "-",
+    "command": "voil.gotoParentDir",
+    "when": "voilDoc && neovim.mode == 'normal'"
+  },
+  {
+    "key": "enter",
+    "command": "voil.enter",
+    "when": "voilDoc"
+  },
+  {
+    "key": "=",
+    "command": "voil.save",
+    "when": "voilDoc"
+  },
+{
+    "key": "q",
+    "command": "voil.close",
+    "when": "voilDoc && neovim.mode == 'normal'"
+  },
+  {
+    "key": "escape",
+    "command": "voil.close",
+    "when": "voilDoc && neovim.mode == 'normal'"
+  },
+
+  // Navigate back/forth when word is selected
+  // {
+  //   "key": "] ]",
+  //   "command": "editor.action.wordHighlight.next",
+  //   "when": "editorTextFocus && hasWordHighlights && neovim.mode == 'normal'"
+  // },
+  // {
+  //   "key": "[ [",
+  //   "command": "editor.action.wordHighlight.prev",
+  //   "when": "editorTextFocus && hasWordHighlights && neovim.mode == 'normal'"
+  // },
+
+  // Harpoon
+  // {
+  //   "key": "q",
+  //   "command": "workbench.action.closeActiveEditor",
+  //   "when": "neovim.mode == 'normal'"
+  // },
+
+  {
+    "key": "cmd+i",
+    "command": "composerMode.agent"
+  }
+]

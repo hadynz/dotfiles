@@ -3,7 +3,7 @@ local weztermSmartSplitsConfig = require("wezterm-smart-splits")
 -- local weztermMoveConfig = require("wezterm-move")
 
 local function isViProcess(pane)
-    return pane:get_title():find("n?vim") ~= nil
+	return pane:get_title():find("n?vim") ~= nil
 end
 
 local config = {
@@ -115,12 +115,12 @@ local config = {
 			end),
 		},
 
-    -- Toggle pane zoom
-    {
-      key = "z",
-      mods = "ALT",
-      action = wezterm.action.TogglePaneZoomState,
-    },
+		-- Toggle pane zoom
+		{
+			key = "z",
+			mods = "ALT",
+			action = wezterm.action.TogglePaneZoomState,
+		},
 
 		-- Tab rename
 		{
@@ -134,6 +134,16 @@ local config = {
 					end
 				end),
 			}),
+		},
+
+		-- Select All
+		{
+			key = "a",
+			mods = "SUPER",
+			action = wezterm.action_callback(function(window, pane)
+				local selected = pane:get_lines_as_text(pane:get_dimensions().scrollback_rows)
+				window:copy_to_clipboard(selected, "Clipboard")
+			end),
 		},
 
 		-- Copy Mode

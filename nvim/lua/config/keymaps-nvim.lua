@@ -144,25 +144,25 @@ map("n", "dd", function()
 end, { expr = true })
 
 -- In insert mode, either move cursor right, or trigger next copilot suggestion
-local move_right = function()
-  local copilot = require("copilot.suggestion")
-  if copilot.is_visible() then
-    copilot.next()
-    return
-  else
-    vim.cmd("normal! l")
-  end
-end
--- In insert mode, either move cursor left, or trigger previous copilot suggestion
-local move_left = function()
-  local copilot = require("copilot.suggestion")
-  if copilot.is_visible() then
-    copilot.prev()
-    return
-  else
-    vim.cmd("normal! h")
-  end
-end
+-- local move_right = function()
+--   local copilot = require("copilot.suggestion")
+--   if copilot.is_visible() then
+--     copilot.next()
+--     return
+--   else
+--     vim.cmd("normal! l")
+--   end
+-- end
+-- -- In insert mode, either move cursor left, or trigger previous copilot suggestion
+-- local move_left = function()
+--   local copilot = require("copilot.suggestion")
+--   if copilot.is_visible() then
+--     copilot.prev()
+--     return
+--   else
+--     vim.cmd("normal! h")
+--   end
+-- end
 
 -- HJKL insert mode navigation
 map("i", "<C-h>", move_left, { desc = "Move cursor left" })
