@@ -22,6 +22,7 @@ end
 -- Editor
 keymap("n", "j", "gj", { silent = true }) -- Enables movement over code folds
 keymap("n", "k", "gk", { silent = true }) -- Enables movement over code folds
+-- keymap("n", "ciw", "_ciw", { silent = true }) -- Disable yanking when using change command
 keymap("n", "u", notify("undo"), { silent = true })
 keymap("n", "U", notify("redo"), { silent = true })
 keymap("n", "==", notify("editor.action.formatDocument"), { silent = true })
@@ -90,6 +91,7 @@ keymap("n", "<leader>zz", notify("workbench.action.toggleZenMode"), { silent = t
 keymap("n", "<leader>w-", notify("workbench.action.splitEditorOrthogonal"), { silent = true })
 keymap("n", "<leader>w\\", notify("workbench.action.splitEditor"), { silent = true })
 keymap("n", "<leader>wq", notify("workbench.action.closeEditorsAndGroup"), { silent = true })
+keymap("n", "<leader>wo", notify("workbench.action.closeEditorsInOtherGroups"), { silent = true })
 
 -- Code actions
 keymap("n", "ga", notify("editor.action.quickFix"), { silent = true })
@@ -111,8 +113,12 @@ keymap("n", "zO", notify("editor.unfoldRecursively"), { silent = true })
 keymap("n", "za", notify("editor.toggleFold"), { silent = true })
 
 -- Git
-keymap("n", "<leader>gc", notify("git.viewChanges"), { silent = true })
 keymap("n", "<leader>gg", notify("lazygit-vscode.toggle"), { silent = true })
+keymap("n", "<leader>go", notify("git.openFile"), { silent = true }) -- Go from file diff to actual file
+keymap("n", "<leader>gr", notify("gitlens.openFileRevisionFrom"), { silent = true }) -- Open Git file revision
+keymap("n", "<leader>gb", notify("gitlens.openFileOnRemoteFrom"), { silent = true }) -- Open Remote file in browser
+keymap("n", "<leader>gdf", notify("git.openChange"), { silent = true }) -- Diff for current file
+keymap("n", "<leader>gdd", notify("git.viewChanges"), { silent = true }) -- Diff for all changed files
 
 -- AI
 keymap("n", "<leader>aa", notify("aichat.focuschatpaneaction"), { silent = true })
@@ -123,5 +129,12 @@ keymap("i", "<leader>an", notify("composer.createNew"), { silent = true })
 -- Specialized features
 keymap("n", "<leader>md", notify("markdown.showPreview"), { silent = true })
 keymap("n", "<leader>uz", notify("workbench.action.toggleZenMode"), { silent = true })
+
+-- Yank
+keymap("n", "<leader>yp", notify("copyRelativeFilePath"), { silent = true }) -- Copy relative file path of active file
+
+-- Diagnostics
+keymap("n", "]d", notify("editor.action.marker.next"), { silent = true })
+keymap("n", "[d", notify("editor.action.marker.next"), { silent = true })
 
 return M

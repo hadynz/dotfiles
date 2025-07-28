@@ -53,24 +53,19 @@
 
   // Spawning Terminals
   {
+    "key": "ctrl+n",
+    "command": "workbench.action.terminal.new",
+    "when": "terminalFocus"
+  },
+  {
     "key": "ctrl+\\",
-    "command": "workbench.action.createTerminalEditorSide",
-    "when": "terminalProcessSupported"
-  },
-  {
-    "key": "ctrl+-",
     "command": "workbench.action.terminal.split",
-    "when": "terminalProcessSupported"
-  },
-
-  // Increase/Decrease window size
-  {
-    "key": "ctrl+right",
-    "command": "workbench.action.decreaseViewWidth"
+    "when": "terminalFocus"
   },
   {
-    "key": "ctrl+left",
-    "command": "workbench.action.increaseViewWidth"
+    "key": "ctrl+q",
+    "command": "workbench.action.terminal.kill",
+    "when": "terminalFocus"
   },
 
   // Navigate back and forth
@@ -123,7 +118,7 @@
     "command": "voil.save",
     "when": "voilDoc"
   },
-{
+  {
     "key": "q",
     "command": "voil.close",
     "when": "voilDoc && neovim.mode == 'normal'"
@@ -156,5 +151,20 @@
   {
     "key": "cmd+i",
     "command": "composerMode.agent"
+  },
+  {
+    "key": "ctrl+-",
+    "command": "workbench.action.navigateBackInEditLocations",
+    "when": "canNavigateBack"
+  },
+  {
+    "key": "ctrl+-",
+    "command": "-workbench.action.navigateBack",
+    "when": "canNavigateBack"
+  },
+  {
+    "key": "ctrl+]",
+    "command": "workbench.action.navigateForwardInEditLocations",
+    "when": "canNavigateForward"
   }
 ]

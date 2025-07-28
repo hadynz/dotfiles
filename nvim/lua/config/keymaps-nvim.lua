@@ -165,10 +165,10 @@ end, { expr = true })
 -- end
 
 -- HJKL insert mode navigation
-map("i", "<C-h>", move_left, { desc = "Move cursor left" })
-map("i", "<C-j>", "<Down>", { desc = "Move cursor down" })
-map("i", "<C-k>", "<Up>", { desc = "Move cursor up" })
-map("i", "<C-l>", move_right, { desc = "Move cursor right" })
+-- map("i", "<C-h>", move_left, { desc = "Move cursor left" })
+-- map("i", "<C-j>", "<Down>", { desc = "Move cursor down" })
+-- map("i", "<C-k>", "<Up>", { desc = "Move cursor up" })
+-- map("i", "<C-l>", move_right, { desc = "Move cursor right" })
 
 -- LSP keymaps
 -- map("n", "gr", telescope_builtin_utils.lsp_references, { desc = "Find all references" })
