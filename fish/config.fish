@@ -25,18 +25,32 @@ alias ll="eza --group --group-directories-first --git --long --all --sort=type"
 
 ## List files/dirs with tree view. Takes in single param to specify tree depth
 function lt
-  set -q argv[1]; or set argv[1] "."
-  set -q argv[2]; or set argv[2] 1 
-  eza --group --header --group-directories-first --git --tree --level $argv[2] $argv[1]
+    set -q argv[1]; or set argv[1] "."
+    set -q argv[2]; or set argv[2] 1
+    eza --group --header --group-directories-first --git --tree --level $argv[2] $argv[1]
 end
 funcsave lt
+
+## Pulls latest from remote version of the current branch
+function glbranch
+    set branch_name (git branch --show-current)
+    if test -n "$argv[1]"
+        set branch_name $argv[1]
+    end
+
+    set command "git pull origin $branch_name --no-rebase"
+
+    echo "Executing: \"$command\""
+    eval $command
+end
+funcsave glbranch
 
 # fzf Aliases
 alias fzf="fzf --preview 'bat --color=always --style=header,grid --line-range :500 {}'"
 
 # Git Aliases
 alias gl="git pull"
-alias glorigin="git pull origin main --no-rebase"
+alias glorigin="glbranch main"
 alias gp="git push --no-verify -f"
 alias gcm="git commit --message"
 alias gcammend="git commit --amend --no-edit"
@@ -80,4 +94,3 @@ export EDITOR="nvim"
 
 # Change LazyGit config directory
 export XDG_CONFIG_HOME="$HOME/.config"
-
