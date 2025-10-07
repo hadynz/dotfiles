@@ -1,5 +1,5 @@
 # Homebrew shellenv (macOS, Homebrew installed via /opt/homebrew)
-if test (uname) = "Darwin"
+if test (uname) = Darwin
     if test -x /opt/homebrew/bin/brew
         eval (/opt/homebrew/bin/brew shellenv)
     end
@@ -21,8 +21,11 @@ alias vi="vim"
 alias oldvi="vi"
 alias c="clear"
 alias nap="/Users/hosman/go/bin/nap"
-alias fnm="/opt/homebrew/bin/fnm"
 alias rovo="acli rovodev"
+
+if test -x /opt/homebrew/bin/fnm
+    alias fnm="/opt/homebrew/bin/fnm"
+end
 
 # ls Aliases
 alias ll="eza --group --group-directories-first --git --long --all --sort=type"
