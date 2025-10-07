@@ -1,3 +1,47 @@
+# Homebrew dependency management
+function check_and_install_dependencies
+    # Define list of required dependencies
+    set dependencies zoxide eza fnm fzf starship bat
+    
+    # Check if brew is installed
+    if not type -q brew
+        echo "🍺 Homebrew is not installed or not in PATH."
+        echo "Please install Homebrew first: https://brew.sh/"
+        return 1
+    end
+    
+    set missing_deps
+    
+    # Check each dependency
+    for dep in $dependencies
+        if not type -q $dep
+            set -a missing_deps $dep
+        end
+    end
+    
+    # If there are missing dependencies, prompt for installation
+    if test (count $missing_deps) -gt 0
+        echo "🔍 Missing dependencies detected: "(string join ", " $missing_deps)
+        echo -n "Would you like to install them via brew? [Y/n] "
+        read -l response
+        
+        # Default to 'yes' if empty response or 'Y'/'y'
+        if test -z "$response"; or string match -qi "y*" "$response"
+            echo "📦 Installing missing dependencies..."
+            for dep in $missing_deps
+                echo "Installing $dep..."
+                brew install $dep
+            end
+            echo "✅ Dependencies installation complete!"
+            echo "Please restart your shell or source your config file."
+        else
+            echo "⚠️  Skipping dependency installation. Some features may not work correctly."
+        end
+    else
+        echo "✅ All dependencies are installed!"
+    end
+end
+
 # Homebrew shellenv (macOS, Homebrew installed via /opt/homebrew)
 if test (uname) = Darwin
     if test -x /opt/homebrew/bin/brew
@@ -6,6 +50,12 @@ if test (uname) = Darwin
 else if test -x /home/linuxbrew/.linuxbrew/bin/brew
     # Optional: Homebrew on Linux
     eval (/home/linuxbrew/.linuxbrew/bin/brew shellenv)
+end
+
+# Check and install dependencies on first load
+# Only run this check if we're in an interactive session
+if status is-interactive
+    check_and_install_dependencies
 end
 
 # Aliases
