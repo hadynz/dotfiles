@@ -3,33 +3,31 @@ function check_and_install_dependencies
     # Define list of required dependencies
     set dependencies zoxide eza fzf starship bat
     
-    # Check if brew is installed
-    if not type -q brew
-        echo "🍺 Homebrew is not installed or not in PATH."
-        echo "Please install Homebrew first: https://brew.sh/"
-        return 1
-    end
-    
-    # Check if running as root (brew doesn't support root installation)
-    if test (id -u) -eq 0
-        echo "⚠️  Running as root detected. Homebrew cannot install packages as root."
-        echo "💡 Switch to a non-root user to install dependencies:"
-        echo "   su - your_username"
-        echo "   # or create a new user if needed:"
-        echo "   useradd -m -s /usr/bin/fish your_username"
-        echo "   su - your_username"
-        echo ""
-        echo "🔍 Missing dependencies that would be installed: "(string join ", " (check_missing_deps))
-        echo ""
-        echo "💡 After switching users, the dependency check will run automatically."
-        echo "   If you need to manually trigger it, run: check_and_install_dependencies"
-        return 1
-    end
-    
     set missing_deps (check_missing_deps)
     
-    # If there are missing dependencies, prompt for installation
+    # If there are missing dependencies, check for brew and prompt for installation
     if test (count $missing_deps) -gt 0
+        # Check if brew is installed
+        if not type -q brew
+            echo "🍺 Homebrew is not installed or not in PATH."
+            echo "Please install Homebrew first: https://brew.sh/"
+            return 1
+        end
+        # Check if running as root (brew doesn't support root installation)
+        if test (id -u) -eq 0
+            echo "⚠️  Running as root detected. Homebrew cannot install packages as root."
+            echo "💡 Switch to a non-root user to install dependencies:"
+            echo "   su - your_username"
+            echo "   # or create a new user if needed:"
+            echo "   useradd -m -s /usr/bin/fish your_username"
+            echo "   su - your_username"
+            echo ""
+            echo "🔍 Missing dependencies that would be installed: "(string join ", " $missing_deps)
+            echo ""
+            echo "💡 After switching users, the dependency check will run automatically."
+            echo "   If you need to manually trigger it, run: check_and_install_dependencies"
+            return 1
+        end
         echo "🔍 Missing dependencies detected: "(string join ", " $missing_deps)
         echo -n "Would you like to install them via brew? [Y/n] "
         read -l response
