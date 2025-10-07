@@ -1,5 +1,3 @@
-# Homebrew dependency management functions
-
 # Helper function to check missing dependencies
 function check_missing_deps
     set dependencies zoxide eza fzf starship bat
@@ -19,9 +17,6 @@ end
 
 # Main function to check and install dependencies
 function check_and_install_dependencies
-    # Define list of required dependencies
-    set dependencies zoxide eza fzf starship bat
-    
     set missing_deps (check_missing_deps)
     
     # If there are missing dependencies, check for brew and prompt for installation
@@ -76,14 +71,12 @@ end
 
 # Show welcome banner for new users
 function show_welcome_banner
-    if test (count (check_missing_deps)) -gt 0
-        echo " ╦ ╦╔═╗╔╦╗╦ ╦╔╗╔╔═╗"
-        echo " ╠═╣╠═╣ ║║╚╦╝║║║╔═╝"
-        echo " ╩ ╩╩ ╩═╩╝ ╩ ╝╚╝╚═╝"
-        echo ""
-        echo "🐟 Welcome to your fish shell configuration!"
-        echo ""
-    end
+    echo " ╦ ╦╔═╗╔╦╗╦ ╦╔╗╔╔═╗"
+    echo " ╠═╣╠═╣ ║║╚╦╝║║║╔═╝"
+    echo " ╩ ╩╩ ╩═╩╝ ╩ ╝╚╝╚═╝"
+    echo ""
+    echo "🐟 Welcome to your fish shell configuration!"
+    echo ""
 end
 
 # Show reminder for remaining missing dependencies
