@@ -50,6 +50,16 @@
     "command": "workbench.action.terminal.focusNextPane",
     "when": "terminalFocus"
   },
+  {
+    "key": "ctrl+shift+h",
+    "command": "workbench.action.terminal.focusPrevious",
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+l",
+    "command": "workbench.action.terminal.focusNext",
+    "when": "terminalFocus"
+  },
 
   // Spawning Terminals
   {

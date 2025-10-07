@@ -1,9 +1,12 @@
-if status is-interactive
-    # Commands to run in interactive sessions can go here
+# Homebrew shellenv (macOS, Homebrew installed via /opt/homebrew)
+if test (uname) = "Darwin"
+    if test -x /opt/homebrew/bin/brew
+        eval (/opt/homebrew/bin/brew shellenv)
+    end
+else if test -x /home/linuxbrew/.linuxbrew/bin/brew
+    # Optional: Homebrew on Linux
+    eval (/home/linuxbrew/.linuxbrew/bin/brew shellenv)
 end
-
-# Add Brew to Path
-eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Aliases
 alias dev="cd $HOME/Development"
@@ -19,6 +22,7 @@ alias oldvi="vi"
 alias c="clear"
 alias nap="/Users/hosman/go/bin/nap"
 alias fnm="/opt/homebrew/bin/fnm"
+alias rovo="acli rovodev"
 
 # ls Aliases
 alias ll="eza --group --group-directories-first --git --long --all --sort=type"
@@ -29,7 +33,7 @@ function lt
     set -q argv[2]; or set argv[2] 1
     eza --group --header --group-directories-first --git --tree --level $argv[2] $argv[1]
 end
-funcsave lt
+funcsave lt >/dev/null 2>&1
 
 ## Pulls latest from remote version of the current branch
 function glbranch
@@ -43,7 +47,7 @@ function glbranch
     echo "Executing: \"$command\""
     eval $command
 end
-funcsave glbranch
+funcsave glbranch >/dev/null 2>&1
 
 # fzf Aliases
 alias fzf="fzf --preview 'bat --color=always --style=header,grid --line-range :500 {}'"
@@ -77,20 +81,32 @@ set fish_cursor_replace_one underscore # Set the replace mode cursors to an unde
 set PATH $PATH /Users/hosman/.local/bin
 
 # Ensure Rust is in local path
-source "$HOME/.cargo/env.fish"
+if test -f ~/.cargo/env.fish
+    source ~/.cargo/env.fish
+end
 
 # ADD FNM to path
-source ~/.config/fish/conf.d/fnm.fish
+if type -q fnm
+    fnm env --use-on-cd | source
+end
 
 # Configure zoxide to replace `cd`
-zoxide init --cmd cd fish | source
+if type -q zoxide
+    zoxide init --cmd cd fish | source
+end
 
 # Run Starship prompt
-starship init fish | source
-export STARSHIP_CONFIG=~/.config/starship/starship.toml
+if type -q starship
+    starship init fish | source
+    export STARSHIP_CONFIG=~/.config/starship/starship.toml
+end
 
 # Config NAP (snippets Go app) to use nvim as editor
 export EDITOR="nvim"
 
 # Change LazyGit config directory
 export XDG_CONFIG_HOME="$HOME/.config"
+
+# bun
+set --export BUN_INSTALL "$HOME/.bun"
+set --export PATH $BUN_INSTALL/bin $PATH

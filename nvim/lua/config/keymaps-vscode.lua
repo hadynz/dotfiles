@@ -22,7 +22,6 @@ end
 -- Editor
 keymap("n", "j", "gj", { silent = true }) -- Enables movement over code folds
 keymap("n", "k", "gk", { silent = true }) -- Enables movement over code folds
--- keymap("n", "ciw", "_ciw", { silent = true }) -- Disable yanking when using change command
 keymap("n", "u", notify("undo"), { silent = true })
 keymap("n", "U", notify("redo"), { silent = true })
 keymap("n", "==", notify("editor.action.formatDocument"), { silent = true })

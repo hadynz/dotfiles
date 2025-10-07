@@ -201,25 +201,51 @@ map("v", "<LeftRelease>", '"*ygv', { desc = "Mouse selection copies to clipboard
 
 map("n", "<leader>ug", "<cmd>:lua require('tint').toggle()<cr>", { desc = "Toggle tint" })
 
--- Copy File Path
 local copy_file_path = function(path)
   vim.fn.setreg("+", path)
-  vim.notify("Copied relative file path to clipboard: " .. path)
+  vim.notify("Copied: " .. path)
 end
 
-local resolve_file_path = function()
-  local choice_callback = function(_choice, index)
-    local path = index == 1 and vim.fn.expand("%") or vim.fn.expand("%:p")
-    copy_file_path(path)
+local copy_file_path_with_lines = function(path)
+  local start_line = vim.fn.line("v")
+  local end_line = vim.fn.line(".")
+
+  -- Ensure start_line is always the smaller number
+  if start_line > end_line then
+    start_line, end_line = end_line, start_line
   end
-  vim.ui.select(
-    { "Copy relative file path", "Copy absolute file path" },
-    { prompt = "Copy File Path" },
-    choice_callback
-  )
+
+  local path_with_lines
+  if start_line == end_line then
+    path_with_lines = path .. ":" .. start_line
+  else
+    path_with_lines = path .. ":" .. start_line .. "-" .. end_line
+  end
+
+  vim.fn.setreg("+", path_with_lines)
+  vim.notify("Copied: " .. path_with_lines)
 end
 
-map("n", "<Leader>yf", resolve_file_path, { desc = "Copy File Path" })
+map({ "n", "v" }, "<Leader>yp", function()
+  copy_file_path(vim.fn.expand("%"))
+end, { desc = "Copy relative file path" })
+
+map({ "n", "v" }, "<Leader>yP", function()
+  copy_file_path(vim.fn.expand("%:p"))
+end, { desc = "Copy absolute file path" })
+
+map({ "n", "v" }, "<Leader>yl", function()
+  local path = vim.fn.expand("%")
+  if vim.fn.mode() == "v" or vim.fn.mode() == "V" or vim.fn.mode() == "\22" then
+    copy_file_path_with_lines(path)
+  else
+    -- In normal mode, just use current line
+    local current_line = vim.fn.line(".")
+    local path_with_line = path .. ":" .. current_line
+    vim.fn.setreg("+", path_with_line)
+    vim.notify("Copied: " .. path_with_line)
+  end
+end, { desc = "Copy relative file path with line numbers" })
 
 --- TMUX navigation
 map("n", "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", { desc = "Go to left window" })

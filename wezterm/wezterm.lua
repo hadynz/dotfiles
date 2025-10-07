@@ -188,6 +188,13 @@ local config = {
 				mode = "SwapWithActive",
 			}),
 		},
+
+		-- Kill current tab/panel
+		{
+			key = "q",
+			mods = "CTRL",
+			action = wezterm.action.CloseCurrentPane({ confirm = true }),
+		},
 	},
 
 	mouse_bindings = {
