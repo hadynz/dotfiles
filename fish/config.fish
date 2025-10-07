@@ -218,6 +218,11 @@ if type -q zoxide
     zoxide init --cmd cd fish | source
 end
 
+# Setup fzf keybindings (Ctrl-R for history search, etc.)
+if type -q fzf
+    fzf --fish | source
+end
+
 # Run Starship prompt
 if type -q starship
     starship init fish | source
