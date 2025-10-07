@@ -1,7 +1,7 @@
 # Homebrew dependency management
 function check_and_install_dependencies
     # Define list of required dependencies
-    set dependencies zoxide eza fnm fzf starship bat
+    set dependencies zoxide eza fzf starship bat
     
     # Check if brew is installed
     if not type -q brew
@@ -37,35 +37,19 @@ function check_and_install_dependencies
         # Default to 'yes' if empty response or 'Y'/'y'
         if test -z "$response"; or string match -qi "y*" "$response"
             echo "📦 Installing missing dependencies..."
+            echo "Running: brew install "(string join " " $missing_deps)
             
-            set failed_installs
-            set successful_installs
-            
-            for dep in $missing_deps
-                echo "Installing $dep..."
-                if brew install $dep
-                    set -a successful_installs $dep
-                else
-                    set -a failed_installs $dep
-                end
-            end
-            
-            # Report results
-            if test (count $successful_installs) -gt 0
-                echo "✅ Successfully installed: "(string join ", " $successful_installs)
-            end
-            
-            if test (count $failed_installs) -gt 0
-                echo "❌ Failed to install: "(string join ", " $failed_installs)
-                echo "💡 You may need to install these manually or check for errors above."
-                return 1
-            else
+            if brew install $missing_deps
                 echo "🎉 All dependencies installation complete!"
                 echo ""
                 echo "💡 To apply changes, you can:"
                 echo "   • Restart your shell: exec fish"
                 echo "   • Source your config: source ~/.config/fish/config.fish"
                 echo "   • Or simply open a new terminal window"
+            else
+                echo "❌ Failed to install some dependencies."
+                echo "💡 You may need to install them manually or check for errors above."
+                return 1
             end
         else
             echo "⚠️  Skipping dependency installation. Some features may not work correctly."
@@ -75,7 +59,7 @@ end
 
 # Helper function to check missing dependencies
 function check_missing_deps
-    set dependencies zoxide eza fnm fzf starship bat
+    set dependencies zoxide eza fzf starship bat
     set missing_deps
     
     for dep in $dependencies
