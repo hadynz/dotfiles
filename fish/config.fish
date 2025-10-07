@@ -10,14 +10,23 @@ function check_and_install_dependencies
         return 1
     end
     
-    set missing_deps
-    
-    # Check each dependency
-    for dep in $dependencies
-        if not type -q $dep
-            set -a missing_deps $dep
-        end
+    # Check if running as root (brew doesn't support root installation)
+    if test (id -u) -eq 0
+        echo "⚠️  Running as root detected. Homebrew cannot install packages as root."
+        echo "💡 Switch to a non-root user to install dependencies:"
+        echo "   su - your_username"
+        echo "   # or create a new user if needed:"
+        echo "   useradd -m -s /usr/bin/fish your_username"
+        echo "   su - your_username"
+        echo ""
+        echo "🔍 Missing dependencies that would be installed: "(string join ", " (check_missing_deps))
+        echo ""
+        echo "💡 After switching users, the dependency check will run automatically."
+        echo "   If you need to manually trigger it, run: check_and_install_dependencies"
+        return 1
     end
+    
+    set missing_deps (check_missing_deps)
     
     # If there are missing dependencies, prompt for installation
     if test (count $missing_deps) -gt 0
@@ -28,19 +37,62 @@ function check_and_install_dependencies
         # Default to 'yes' if empty response or 'Y'/'y'
         if test -z "$response"; or string match -qi "y*" "$response"
             echo "📦 Installing missing dependencies..."
+            
+            set failed_installs
+            set successful_installs
+            
             for dep in $missing_deps
                 echo "Installing $dep..."
-                brew install $dep
+                if brew install $dep
+                    set -a successful_installs $dep
+                else
+                    set -a failed_installs $dep
+                end
             end
-            echo "✅ Dependencies installation complete!"
-            echo "Please restart your shell or source your config file."
+            
+            # Report results
+            if test (count $successful_installs) -gt 0
+                echo "✅ Successfully installed: "(string join ", " $successful_installs)
+            end
+            
+            if test (count $failed_installs) -gt 0
+                echo "❌ Failed to install: "(string join ", " $failed_installs)
+                echo "💡 You may need to install these manually or check for errors above."
+                return 1
+            else
+                echo "🎉 All dependencies installation complete!"
+                echo ""
+                echo "💡 To apply changes, you can:"
+                echo "   • Restart your shell: exec fish"
+                echo "   • Source your config: source ~/.config/fish/config.fish"
+                echo "   • Or simply open a new terminal window"
+            end
         else
             echo "⚠️  Skipping dependency installation. Some features may not work correctly."
         end
-    else
-        echo "✅ All dependencies are installed!"
     end
 end
+
+# Helper function to check missing dependencies
+function check_missing_deps
+    set dependencies zoxide eza fnm fzf starship bat
+    set missing_deps
+    
+    for dep in $dependencies
+        if not type -q $dep
+            set -a missing_deps $dep
+        end
+    end
+    
+    echo $missing_deps
+end
+
+# Save functions so they're available in all sessions
+funcsave check_and_install_dependencies >/dev/null 2>&1
+funcsave check_missing_deps >/dev/null 2>&1
+
+# Convenience alias for quick dependency check
+alias deps="check_and_install_dependencies"
 
 # Homebrew shellenv (macOS, Homebrew installed via /opt/homebrew)
 if test (uname) = Darwin
@@ -55,7 +107,25 @@ end
 # Check and install dependencies on first load
 # Only run this check if we're in an interactive session
 if status is-interactive
+    # Show a brief welcome message for new users
+    if test (count (check_missing_deps)) -gt 0; or test (id -u) -eq 0
+        echo " ╦ ╦╔═╗╔╦╗╦ ╦╔╗╔╔═╗"
+        echo " ╠═╣╠═╣ ║║╚╦╝║║║╔═╝"
+        echo " ╩ ╩╩ ╩═╩╝ ╩ ╝╚╝╚═╝"
+        echo ""
+        echo "🐟 Welcome to your fish shell configuration!"
+        echo ""
+    end
+    
     check_and_install_dependencies
+    
+    # If we still have missing deps after the check, show a reminder
+    set remaining_missing (check_missing_deps)
+    if test (count $remaining_missing) -gt 0
+        echo ""
+        echo "📝 Note: Some dependencies are still missing: "(string join ", " $remaining_missing)
+        echo "💡 Some shell features may not work until these are installed."
+    end
 end
 
 # Aliases
