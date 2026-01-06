@@ -57,15 +57,20 @@ return {
 
   {
     "neovim/nvim-lspconfig",
-    opts = function()
-      local keys = require("lazyvim.plugins.lsp.keymaps").get()
+    opts = {
+      servers = {
+        -- Apply these key overrides to all LSP servers
+        ['*'] = {
+          keys = {
+            -- disable signature help showing in insert mode; conflicts with hjkl navigation in insert mode
+            { "<c-k>", false, mode = "i" },
 
-      -- disable signature help showing in insert mode; conflicts with hjkl navigation in insert mode
-      keys[#keys + 1] = { "<c-k>", false, mode = "i" }
-
-      -- Override defaults to replace with custom keymapping
-      keys[#keys + 1] = { "K", false, mode = "n" } -- Hover; replace to use hover.nvim
-      keys[#keys + 1] = { "gK", false, mode = "n" } -- Hover (signature help); replace to use hover.nvim
-    end,
+            -- Override defaults to replace with custom keymapping
+            { "K", false, mode = "n" }, -- Hover; replace to use hover.nvim
+            { "gK", false, mode = "n" }, -- Hover (signature help); replace to use hover.nvim
+          },
+        },
+      },
+    },
   },
 }
