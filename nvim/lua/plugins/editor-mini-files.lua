@@ -8,7 +8,7 @@ end
 
 -- Predicate function to hide dot files
 return {
-  "echasnovski/mini.files",
+  "nvim-mini/mini.files",
   version = "*",
   config = function()
     local f = require("utils.mini-files.extra-bindings")
