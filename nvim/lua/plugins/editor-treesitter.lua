@@ -1,15 +1,15 @@
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    config = function(_, opts)
-      require("nvim-treesitter.configs").setup(opts)
-
-      -- Parse .flow files using the python parser
+    opts = function(_, opts)
+      -- Let LazyVim handle the treesitter configuration
+      -- Just add custom filetype associations
       vim.filetype.add({
         extension = {
           flow = "python",
         },
       })
+      return opts
     end,
   },
 }
