@@ -44,30 +44,15 @@ end
 # ls Aliases
 alias ll="eza --group --group-directories-first --git --long --all --sort=type"
 
-## List files/dirs with tree view. Takes in single param to specify tree depth
-function lt
-    set -q argv[1]; or set argv[1] "."
-    set -q argv[2]; or set argv[2] 1
-    eza --group --header --group-directories-first --git --tree --level $argv[2] $argv[1]
-end
-funcsave lt >/dev/null 2>&1
-
-## Pulls latest from remote version of the current branch
-function glbranch
-    set branch_name (git branch --show-current)
-    if test -n "$argv[1]"
-        set branch_name $argv[1]
-    end
-
-    set command "git pull origin $branch_name --no-rebase"
-
-    echo "Executing: \"$command\""
-    eval $command
-end
-funcsave glbranch >/dev/null 2>&1
-
 # fzf Aliases
-alias fzf="fzf --preview 'bat --color=always --style=header,grid --line-range :500 {}'"
+# Keep your preferred default preview for interactive `fzf` usage.
+# Ctrl+R is rebound below to use `command fzf` so this alias doesn't affect it.
+# If bat isn't available, fall back to plain fzf (no preview) to avoid errors.
+if type -q bat
+    alias fzf="command fzf --preview 'bat --color=always --style=header,grid --line-range :500 -- {}'"
+else
+    alias fzf="command fzf"
+end
 
 # Git Aliases
 alias gl="git pull"
@@ -103,7 +88,8 @@ if test -f ~/.cargo/env.fish
 end
 
 # ADD FNM to path
-if type -q fnm
+# Only initialize in interactive shells; non-interactive `fish -c` can't infer the shell in some environments.
+if status is-interactive; and type -q fnm
     fnm env --use-on-cd | source
 end
 
@@ -115,6 +101,11 @@ end
 # Setup fzf keybindings (Ctrl-R for history search, etc.)
 if type -q fzf
     fzf --fish | source
+
+    # Override Ctrl+R to avoid being affected by an `fzf` alias/function.
+    # We bind both default and vi-insert mode.
+    bind \cr rovo_fzf_history
+    bind -M insert \cr rovo_fzf_history
 end
 
 # Run Starship prompt
@@ -134,55 +125,4 @@ set --export BUN_INSTALL "$HOME/.bun"
 set --export PATH $BUN_INSTALL/bin $PATH
 
 # proxmox-specific
-function remount-ssd
-    set SSD_PATH /mnt/external-ssd
-    set CONTAINERS (pct list | awk 'NR>1 {print $1}')
-
-    if test (count $CONTAINERS) -eq 0
-        echo "⚠️  No running containers found."
-        return
-    end
-
-    echo "🧩 Preparing to remount: $SSD_PATH"
-    echo "───────────────────────────────────────"
-    echo "Stopping containers that may be using it..."
-
-    for cid in $CONTAINERS
-        echo -n "  ⏹️  Stopping LXC $cid... "
-        pct stop $cid >/dev/null 2>&1
-        if test $status -eq 0
-            echo "✅ done"
-        else
-            echo "⚠️  failed"
-        end
-    end
-
-    echo ""
-    echo "🔄 Unmounting and remounting $SSD_PATH..."
-    umount $SSD_PATH 2>/dev/null
-    mount -a
-    if test $status -eq 0
-        echo "✅ Remounted successfully."
-    else
-        echo "⚠️  Remount failed! Check mount options."
-        return 1
-    end
-
-    echo ""
-    echo "🚀 Restarting containers..."
-    for cid in $CONTAINERS
-        echo -n "  ▶️  Starting LXC $cid... "
-        pct start $cid >/dev/null 2>&1
-        if test $status -eq 0
-            echo "✅ running"
-        else
-            echo "⚠️  failed"
-        end
-    end
-
-    echo ""
-    echo "✅ All done! External SSD remounted and containers restarted."
-end
-
-funcsave remount-ssd
 
