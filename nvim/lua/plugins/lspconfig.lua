@@ -46,6 +46,24 @@ return {
             { "gR", false },
           },
         },
+        eslint = {
+          -- Support Yarn PnP (Plug'n'Play) workspaces
+          settings = {
+            workingDirectory = { mode = "auto" },
+            -- Point to Yarn SDK for ESLint library resolution
+            nodePath = vim.fn.getcwd() .. "/.yarn/sdks",
+            packageManager = "yarn",
+            experimental = {
+              useFlatConfig = false,
+            },
+          },
+          root_dir = require("lspconfig.util").root_pattern(
+            ".eslintrc.js",
+            ".eslintrc.json",
+            ".eslintrc.cjs",
+            "package.json"
+          ),
+        },
       },
     },
   },
