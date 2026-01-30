@@ -22,13 +22,8 @@ return {
           },
         },
         vtsls = {
-          -- Required to inform LSP server to send `zipfile:` URI as `zip:` (Yarn PNP need)
+          -- Required to inform LSP server to send `zipfile:` URI as `zip:` (Yarn PnP need)
           init_options = { hostInfo = "neovim" },
-
-          root_dir = function()
-            local lazyvimRoot = require("lazyvim.util.root")
-            return lazyvimRoot.git()
-          end,
 
           settings = {
             typescript = {
