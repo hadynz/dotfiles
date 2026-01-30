@@ -85,7 +85,11 @@ return {
     input = {
       win = {
         border = vim.g.borderStyle,
-        keys = { q = "close", ["<Esc>"] = "close" },
+        keys = {
+          q = "close",
+          -- Override Snacks default n_esc mapping (which has cmp_close)
+          n_esc = { "<esc>", "close", mode = "n" },
+        },
       },
     },
   },
