@@ -44,14 +44,9 @@ end
 # ls Aliases
 alias ll="eza --group --group-directories-first --git --long --all --sort=type"
 
-# fzf Aliases
-# Keep your preferred default preview for interactive `fzf` usage.
-# Ctrl+R is rebound below to use `command fzf` so this alias doesn't affect it.
-# If bat isn't available, fall back to plain fzf (no preview) to avoid errors.
+# fzf with preview - use 'fzfp' for fzf with bat preview
 if type -q bat
-    alias fzf="command fzf --preview 'bat --color=always --style=header,grid --line-range :500 -- {}'"
-else
-    alias fzf="command fzf"
+    alias fzfp="fzf --preview 'bat --color=always --style=header,grid --line-range :500 -- {}'"
 end
 
 # Git Aliases
@@ -101,11 +96,6 @@ end
 # Setup fzf keybindings (Ctrl-R for history search, etc.)
 if type -q fzf
     fzf --fish | source
-
-    # Override Ctrl+R to avoid being affected by an `fzf` alias/function.
-    # We bind both default and vi-insert mode.
-    bind \cr rovo_fzf_history
-    bind -M insert \cr rovo_fzf_history
 end
 
 # Run Starship prompt
