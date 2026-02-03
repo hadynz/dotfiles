@@ -31,7 +31,7 @@ declare -a COMPONENTS=(
     "Tmux:tmux:tmux:tmux:tmux:0"
     "Wezterm:wezterm:MANUAL:wezterm:wezterm:1"
     "Starship:starship:MANUAL:starship:starship:0"
-    "Lazygit:jesseduffield/lazygit/lazygit:MANUAL:lazygit:lazygit:0"
+    "Lazygit:jesseduffield/lazygit/lazygit:lazygit:lazygit:0"
     "VSCode:visual-studio-code:MANUAL:code:vscode:1"
     "Cursor:cursor:N/A:cursor:vscode:1"
 )
@@ -338,7 +338,8 @@ stow_configs() {
                     print_warning "[DRY RUN] Would stow: $stow_dir → ~/.config/"
                 else
                     # Explicitly set target to avoid issues with .stowrc tilde expansion
-                    if stow --target="$HOME/.config" "$stow_dir" 2>&1 | grep -q "already stowed\|conflicts"; then
+                    # Use --no-folding to prevent stow from creating individual file symlinks
+                    if stow --no-folding --target="$HOME/.config" "$stow_dir" 2>&1 | grep -q "already stowed\|conflicts"; then
                         print_warning "Config already exists or conflicts, skipping"
                     else
                         print_info "✓ $display_name configs stowed"
@@ -377,7 +378,7 @@ stow_vscode_configs() {
         if [ "$DRY_RUN" = true ]; then
             print_warning "[DRY RUN] Would stow: vscode → $target_dir"
         else
-            if stow --target="$target_dir" vscode 2>&1 | grep -q "already stowed\|conflicts"; then
+            if stow --no-folding --target="$target_dir" vscode 2>&1 | grep -q "already stowed\|conflicts"; then
                 print_warning "Config already exists or conflicts, skipping"
             else
                 print_info "✓ $app_name configs stowed"
@@ -417,13 +418,13 @@ setup_fish_shell() {
         return
     fi
     
-    echo ""
-    
     if [ "$NON_INTERACTIVE" = true ]; then
+        echo ""
         print_info "Non-interactive mode: Skipping default shell change"
         return
     fi
     
+    echo ""
     echo "Fish is installed but not your default shell."
     read -p "Would you like to set Fish as your default shell? [y/N] " -n 1 -r
     echo
