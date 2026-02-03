@@ -32,7 +32,7 @@ declare -a COMPONENTS=(
     "Fish Shell:fish:fish:fish:fish:0"
     "Neovim:neovim:neovim:nvim:nvim:0"
     "Tmux:tmux:tmux:tmux:tmux:0"
-    "Lazygit:jesseduffield/lazygit/lazygit:lazygit:lazygit:0"
+    "Lazygit:jesseduffield/lazygit/lazygit:lazygit:lazygit:lazygit:0"
     "Starship:starship:MANUAL:starship:starship:0"
     "Wezterm:wezterm:MANUAL:wezterm:wezterm:1"
     "VSCode:visual-studio-code:MANUAL:code:vscode:1"
