@@ -23,17 +23,24 @@ NON_INTERACTIVE=false
 AUTO_SELECT_ALL=false
 
 # Component definitions
-# Format: "display_name:brew_package:binary_name:stow_dir:is_cask"
+# Format: "display_name:brew_package:apt_package:binary_name:stow_dir:is_cask"
+# Note: "MANUAL" means requires special installation steps
 declare -a COMPONENTS=(
-    "Fish Shell:fish:fish:fish:0"
-    "Neovim:neovim:nvim:nvim:0"
-    "Tmux:tmux:tmux:tmux:0"
-    "Wezterm:wezterm:wezterm:wezterm:1"
-    "Starship:starship:starship:starship:0"
-    "Lazygit:jesseduffield/lazygit/lazygit:lazygit:lazygit:0"
-    "VSCode:visual-studio-code:code:vscode:1"
-    "Cursor:cursor:cursor:vscode:1"
+    "Fish Shell:fish:fish:fish:fish:0"
+    "Neovim:neovim:neovim:nvim:nvim:0"
+    "Tmux:tmux:tmux:tmux:tmux:0"
+    "Wezterm:wezterm:MANUAL:wezterm:wezterm:1"
+    "Starship:starship:MANUAL:starship:starship:0"
+    "Lazygit:jesseduffield/lazygit/lazygit:MANUAL:lazygit:lazygit:0"
+    "VSCode:visual-studio-code:MANUAL:code:vscode:1"
+    "Cursor:cursor:N/A:cursor:vscode:1"
 )
+
+# Track components that need manual installation
+declare -a MANUAL_INSTALL_NEEDED=()
+
+# Selected package manager
+PACKAGE_MANAGER=""
 
 # Selected components (will be populated by user)
 declare -a SELECTED_COMPONENTS=()
@@ -71,26 +78,53 @@ detect_os() {
 }
 
 # ============================================================================
-# Homebrew Check
+# Package Manager Detection
 # ============================================================================
 
-check_homebrew() {
-    print_header "Checking Homebrew installation"
+detect_package_manager() {
+    print_header "Detecting package manager"
     
-    if command -v brew &> /dev/null; then
-        local brew_version=$(brew --version | head -n1)
-        print_info "Homebrew found: $brew_version"
-        return 0
-    else
-        print_error "Homebrew is not installed!"
-        echo ""
-        echo "Homebrew is required for automatic package installation."
-        echo "Install it with:"
-        echo ""
-        echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-        echo ""
-        exit 1
+    local OS=$(detect_os)
+    
+    # On Linux, prefer system package manager (especially for root)
+    if [ "$OS" = "linux" ]; then
+        if command -v apt-get &> /dev/null; then
+            PACKAGE_MANAGER="apt"
+            print_info "Using apt-get (Debian/Ubuntu)"
+            return 0
+        elif command -v dnf &> /dev/null; then
+            PACKAGE_MANAGER="dnf"
+            print_info "Using dnf (Fedora/RHEL)"
+            print_warning "Note: This script is optimized for apt-get. dnf support is experimental."
+            return 0
+        elif command -v pacman &> /dev/null; then
+            PACKAGE_MANAGER="pacman"
+            print_info "Using pacman (Arch Linux)"
+            print_warning "Note: This script is optimized for apt-get. pacman support is experimental."
+            return 0
+        fi
     fi
+    
+    # Fall back to Homebrew (macOS or Linux without system package manager)
+    if command -v brew &> /dev/null; then
+        PACKAGE_MANAGER="brew"
+        local brew_version=$(brew --version | head -n1)
+        print_info "Using Homebrew: $brew_version"
+        return 0
+    fi
+    
+    # No package manager found
+    print_error "No supported package manager found!"
+    echo ""
+    if [ "$OS" = "macos" ]; then
+        echo "Please install Homebrew:"
+        echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+    else
+        echo "Expected to find apt-get, dnf, pacman, or brew, but none were found."
+        echo "Please install one of these package managers first."
+    fi
+    echo ""
+    exit 1
 }
 
 # ============================================================================
@@ -122,7 +156,7 @@ select_components_fzf() {
     # Create options list
     local options=()
     for component in "${COMPONENTS[@]}"; do
-        IFS=':' read -r display_name brew_pkg binary stow_dir is_cask <<< "$component"
+        IFS=':' read -r display_name brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
         options+=("$display_name")
     done
     
@@ -144,7 +178,7 @@ select_components_fzf() {
     # Map selected display names back to components
     while IFS= read -r display_name; do
         for component in "${COMPONENTS[@]}"; do
-            IFS=':' read -r comp_display brew_pkg binary stow_dir is_cask <<< "$component"
+            IFS=':' read -r comp_display brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
             if [ "$comp_display" = "$display_name" ]; then
                 SELECTED_COMPONENTS+=("$component")
                 break
@@ -158,7 +192,7 @@ select_components_simple() {
     echo ""
     
     for component in "${COMPONENTS[@]}"; do
-        IFS=':' read -r display_name brew_pkg binary stow_dir is_cask <<< "$component"
+        IFS=':' read -r display_name brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
         
         read -p "  Install $display_name? [y/N] " -n 1 -r
         echo
@@ -177,31 +211,93 @@ select_components_simple() {
 # Dependency Check & Installation
 # ============================================================================
 
+install_package() {
+    local package_name=$1
+    local is_cask=$2
+    
+    case $PACKAGE_MANAGER in
+        brew)
+            if [ "$is_cask" = "1" ]; then
+                brew install --cask "$package_name"
+            else
+                brew install "$package_name"
+            fi
+            ;;
+        apt)
+            # For apt, we need sudo if not root
+            if [ "$EUID" -eq 0 ]; then
+                apt-get update -qq && apt-get install -y "$package_name"
+            else
+                sudo apt-get update -qq && sudo apt-get install -y "$package_name"
+            fi
+            ;;
+        dnf)
+            if [ "$EUID" -eq 0 ]; then
+                dnf install -y "$package_name"
+            else
+                sudo dnf install -y "$package_name"
+            fi
+            ;;
+        pacman)
+            if [ "$EUID" -eq 0 ]; then
+                pacman -S --noconfirm "$package_name"
+            else
+                sudo pacman -S --noconfirm "$package_name"
+            fi
+            ;;
+        *)
+            print_error "Unknown package manager: $PACKAGE_MANAGER"
+            return 1
+            ;;
+    esac
+}
+
 check_and_install_components() {
     print_header "Checking and installing components"
     
     for component in "${SELECTED_COMPONENTS[@]}"; do
-        IFS=':' read -r display_name brew_pkg binary stow_dir is_cask <<< "$component"
+        IFS=':' read -r display_name brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
         
         echo ""
         print_step "Processing: $display_name"
+        
+        # Select the correct package name based on package manager
+        local package_name=""
+        if [ "$PACKAGE_MANAGER" = "brew" ]; then
+            package_name="$brew_pkg"
+        else
+            package_name="$apt_pkg"
+        fi
+        
+        # Check if package is available for this package manager
+        if [ "$package_name" = "N/A" ]; then
+            print_warning "$display_name is not available via $PACKAGE_MANAGER"
+            print_warning "You'll need to install it manually. Skipping..."
+            continue
+        fi
+        
+        # Check if package requires manual installation
+        if [ "$package_name" = "MANUAL" ]; then
+            print_warning "$display_name requires manual installation via $PACKAGE_MANAGER"
+            MANUAL_INSTALL_NEEDED+=("$display_name")
+            continue
+        fi
         
         # Check if already installed
         if command -v "$binary" &> /dev/null; then
             local version=$($binary --version 2>/dev/null | head -n1 || echo "installed")
             print_info "$display_name already installed: $version"
         else
-            # Install via brew
+            # Install via package manager
             if [ "$DRY_RUN" = true ]; then
-                print_warning "[DRY RUN] Would install: $brew_pkg"
+                print_warning "[DRY RUN] Would install: $package_name (via $PACKAGE_MANAGER)"
             else
-                print_step "Installing $display_name via Homebrew..."
-                if [ "$is_cask" = "1" ]; then
-                    brew install --cask "$brew_pkg"
+                print_step "Installing $display_name via $PACKAGE_MANAGER..."
+                if install_package "$package_name" "$is_cask"; then
+                    print_info "$display_name installed successfully"
                 else
-                    brew install "$brew_pkg"
+                    print_error "Failed to install $display_name"
                 fi
-                print_info "$display_name installed successfully"
             fi
         fi
     done
@@ -218,16 +314,16 @@ stow_configs() {
     if ! command -v stow &> /dev/null; then
         print_step "Installing GNU Stow..."
         if [ "$DRY_RUN" = false ]; then
-            brew install stow
+            install_package "stow" "0"
         else
-            print_warning "[DRY RUN] Would install: stow"
+            print_warning "[DRY RUN] Would install: stow (via $PACKAGE_MANAGER)"
         fi
     fi
     
     local OS=$(detect_os)
     
     for component in "${SELECTED_COMPONENTS[@]}"; do
-        IFS=':' read -r display_name brew_pkg binary stow_dir is_cask <<< "$component"
+        IFS=':' read -r display_name brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
         
         echo ""
         print_step "Stowing $display_name configs"
@@ -349,11 +445,24 @@ setup_fish_shell() {
 print_summary() {
     print_header "Installation Summary"
     echo ""
+    print_info "Package Manager: $PACKAGE_MANAGER"
     print_info "Selected components:"
     for component in "${SELECTED_COMPONENTS[@]}"; do
-        IFS=':' read -r display_name brew_pkg binary stow_dir is_cask <<< "$component"
+        IFS=':' read -r display_name brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
         echo "  • $display_name"
     done
+    
+    echo ""
+    
+    # Show manual installation instructions if needed
+    if [ ${#MANUAL_INSTALL_NEEDED[@]} -gt 0 ]; then
+        print_warning "Manual installation required for:"
+        for component in "${MANUAL_INSTALL_NEEDED[@]}"; do
+            echo "  • $component"
+        done
+        echo ""
+        show_manual_install_instructions
+    fi
     
     echo ""
     if [ "$DRY_RUN" = true ]; then
@@ -367,6 +476,45 @@ print_summary() {
         echo "  2. Open Neovim and run :Lazy sync (if installed)"
         echo "  3. Check that everything works as expected"
     fi
+}
+
+# ============================================================================
+# Manual Installation Instructions
+# ============================================================================
+
+show_manual_install_instructions() {
+    echo "Manual installation instructions:"
+    echo ""
+    
+    for component in "${MANUAL_INSTALL_NEEDED[@]}"; do
+        case $component in
+            "Starship")
+                echo "📦 Starship:"
+                echo "  curl -sS https://starship.rs/install.sh | sh"
+                echo ""
+                ;;
+            "Lazygit")
+                echo "📦 Lazygit:"
+                echo "  LAZYGIT_VERSION=\$(curl -s \"https://api.github.com/repos/jesseduffield/lazygit/releases/latest\" | grep -Po '\"tag_name\": \"v\K[^\"]*')"
+                echo "  curl -Lo lazygit.tar.gz \"https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_\${LAZYGIT_VERSION}_Linux_x86_64.tar.gz\""
+                echo "  tar xf lazygit.tar.gz lazygit"
+                echo "  sudo install lazygit /usr/local/bin"
+                echo ""
+                ;;
+            "Wezterm")
+                echo "📦 Wezterm:"
+                echo "  # Download from: https://wezfurlong.org/wezterm/install/linux.html"
+                echo "  # Or use flatpak: flatpak install flathub org.wezfurlong.wezterm"
+                echo ""
+                ;;
+            "VSCode")
+                echo "📦 VSCode:"
+                echo "  # Download from: https://code.visualstudio.com/download"
+                echo "  # Or: sudo snap install code --classic"
+                echo ""
+                ;;
+        esac
+    done
 }
 
 # ============================================================================
@@ -431,7 +579,7 @@ main() {
     fi
     
     # Run installation steps
-    check_homebrew
+    detect_package_manager
     select_components
     check_and_install_components
     stow_configs

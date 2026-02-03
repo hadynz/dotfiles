@@ -13,22 +13,31 @@ Cross-platform dotfiles managed with GNU Stow, supporting macOS and Linux with a
 
 ## 🚀 Quick Start
 
+### macOS
 ```bash
-# 1. Install Homebrew (required)
+# 1. Install Homebrew
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# 2. Clone the repository
+# 2. Clone and run
 git clone <your-repo-url> ~/dotfiles
 cd ~/dotfiles
+./setup.sh
+```
 
-# 3. Run the interactive setup
+### Linux (Debian/Ubuntu)
+```bash
+# No prerequisites needed! The script uses apt-get automatically
+
+# Clone and run
+git clone <your-repo-url> ~/dotfiles
+cd ~/dotfiles
 ./setup.sh
 ```
 
 The script will:
-1. ✅ Check that Homebrew is installed
+1. ✅ Detect your package manager (brew/apt-get/dnf/pacman)
 2. 🎯 Let you select which components to install (Fish, Neovim, Tmux, etc.)
-3. 📦 Auto-install missing tools via Homebrew
+3. 📦 Auto-install missing tools via your package manager
 4. 🔗 Stow configuration files to the correct locations
 5. 🐚 Optionally set Fish as your default shell
 
@@ -80,6 +89,14 @@ Perfect for scripts/automation:
 
 ## 📖 How It Works
 
+### Package Manager Detection
+
+The script automatically detects and uses the best package manager for your system:
+- **Linux**: Prefers system package managers (apt-get, dnf, pacman)
+- **macOS**: Uses Homebrew
+- **Works as root**: On Linux, uses apt-get/dnf/pacman which work with root
+- **Works as regular user**: Uses Homebrew or system packages with sudo
+
 ### Configuration Stowing
 
 - **Common configs**: Stowed to `~/.config/` (fish, nvim, tmux, etc.)
@@ -91,7 +108,8 @@ Perfect for scripts/automation:
 
 The script checks if each selected tool is installed:
 - ✅ Already installed → Skip to stowing configs
-- ❌ Not installed → Install via `brew install <package>`
+- ❌ Not installed → Install via detected package manager
+- ⚠️ Manual install needed → Shows installation instructions for tools not in package manager
 
 ## 🛠️ Manual Installation
 
@@ -118,8 +136,14 @@ stow -t ~/.config/Code/User vscode
 
 ## 🔧 Requirements
 
+### macOS
 - **Homebrew** (required) - [Install here](https://brew.sh)
 - **fzf** (optional) - Better interactive selection UX
+
+### Linux
+- **apt-get, dnf, or pacman** (usually pre-installed)
+- **fzf** (optional) - Better interactive selection UX
+- **Or Homebrew** - Works on Linux too!
 
 ## 📝 Help
 
