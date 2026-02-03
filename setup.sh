@@ -22,18 +22,31 @@ DRY_RUN=false
 NON_INTERACTIVE=false
 AUTO_SELECT_ALL=false
 
+# Unstow mode
+UNSTOW_MODE=false
+
 # Component definitions
-# Format: "display_name:brew_package:apt_package:binary_name:stow_dir:is_cask"
-# Note: "MANUAL" means requires special installation steps
+# Format: "display_name:brew_package:apt_package:binary_name:config_dir:is_cask"
+# Note: "MANUAL" means requires special installation steps, "N/A" means not available
 declare -a COMPONENTS=(
     "Fish Shell:fish:fish:fish:fish:0"
     "Neovim:neovim:neovim:nvim:nvim:0"
     "Tmux:tmux:tmux:tmux:tmux:0"
-    "Wezterm:wezterm:MANUAL:wezterm:wezterm:1"
-    "Starship:starship:MANUAL:starship:starship:0"
     "Lazygit:jesseduffield/lazygit/lazygit:lazygit:lazygit:0"
+    "Starship:starship:MANUAL:starship:starship:0"
+    "Wezterm:wezterm:MANUAL:wezterm:wezterm:1"
     "VSCode:visual-studio-code:MANUAL:code:vscode:1"
     "Cursor:cursor:N/A:cursor:vscode:1"
+)
+
+# Fish shell dependencies (optional but recommended for full functionality)
+declare -a FISH_DEPS=(
+    "Eza (better ls):eza:eza:eza::0"
+    "Bat (better cat):bat:bat:bat::0"
+    "Fzf (fuzzy finder):fzf:fzf:fzf::0"
+    "Zoxide (smart cd):zoxide:zoxide:zoxide::0"
+    "Ripgrep (better grep):ripgrep:ripgrep:rg::0"
+    "Fd (better find):fd:fd-find:fd::0"
 )
 
 # Track components that need manual installation
@@ -136,7 +149,7 @@ select_components() {
     
     # Auto-select all in non-interactive mode
     if [ "$NON_INTERACTIVE" = true ] || [ "$AUTO_SELECT_ALL" = true ]; then
-        SELECTED_COMPONENTS=("${COMPONENTS[@]}")
+        SELECTED_COMPONENTS=("${COMPONENTS[@]}" "${FISH_DEPS[@]}")
         print_info "Auto-selected all components (${#SELECTED_COMPONENTS[@]} total)"
         return
     fi
@@ -147,6 +160,9 @@ select_components() {
     else
         select_components_simple
     fi
+    
+    # Ask about fish dependencies if fish is selected
+    ask_about_fish_deps
 }
 
 select_components_fzf() {
@@ -156,7 +172,7 @@ select_components_fzf() {
     # Create options list
     local options=()
     for component in "${COMPONENTS[@]}"; do
-        IFS=':' read -r display_name brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
+        IFS=':' read -r display_name brew_pkg apt_pkg binary config_dir is_cask <<< "$component"
         options+=("$display_name")
     done
     
@@ -178,7 +194,7 @@ select_components_fzf() {
     # Map selected display names back to components
     while IFS= read -r display_name; do
         for component in "${COMPONENTS[@]}"; do
-            IFS=':' read -r comp_display brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
+            IFS=':' read -r comp_display brew_pkg apt_pkg binary config_dir is_cask <<< "$component"
             if [ "$comp_display" = "$display_name" ]; then
                 SELECTED_COMPONENTS+=("$component")
                 break
@@ -189,21 +205,51 @@ select_components_fzf() {
 
 select_components_simple() {
     echo "Select components (y/n):"
-    echo ""
     
     for component in "${COMPONENTS[@]}"; do
-        IFS=':' read -r display_name brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
+        IFS=':' read -r display_name brew_pkg apt_pkg binary config_dir is_cask <<< "$component"
         
         read -p "  Install $display_name? [y/N] " -n 1 -r
-        echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             SELECTED_COMPONENTS+=("$component")
+            echo " ✓"
+        else
+            echo ""
         fi
     done
     
     if [ ${#SELECTED_COMPONENTS[@]} -eq 0 ]; then
         print_warning "No components selected. Exiting."
         exit 0
+    fi
+}
+
+ask_about_fish_deps() {
+    # Check if fish was selected
+    local fish_selected=false
+    for component in "${SELECTED_COMPONENTS[@]}"; do
+        if [[ $component == "Fish Shell"* ]]; then
+            fish_selected=true
+            break
+        fi
+    done
+    
+    if [ "$fish_selected" = false ]; then
+        return
+    fi
+    
+    echo ""
+    echo "Fish shell uses several optional tools for enhanced functionality:"
+    echo "  • eza (better ls), bat (syntax highlighting), fzf (fuzzy finder)"
+    echo "  • zoxide (smart cd), ripgrep (fast search), fd (fast find)"
+    echo ""
+    read -p "Install Fish shell dependencies? [Y/n] " -n 1 -r
+    echo
+    
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+        # Add all fish deps
+        SELECTED_COMPONENTS+=("${FISH_DEPS[@]}")
+        print_info "Added ${#FISH_DEPS[@]} fish dependencies"
     fi
 }
 
@@ -256,10 +302,15 @@ check_and_install_components() {
     print_header "Checking and installing components"
     
     for component in "${SELECTED_COMPONENTS[@]}"; do
-        IFS=':' read -r display_name brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
+        IFS=':' read -r display_name brew_pkg apt_pkg binary config_dir is_cask <<< "$component"
         
         echo ""
         print_step "Processing: $display_name"
+        
+        # Skip empty entries (from fish deps with no config_dir)
+        if [ -z "$binary" ]; then
+            continue
+        fi
         
         # Select the correct package name based on package manager
         local package_name=""
@@ -304,57 +355,72 @@ check_and_install_components() {
 }
 
 # ============================================================================
-# Stow Configuration Files
+# Link Configuration Files
 # ============================================================================
 
-stow_configs() {
-    print_header "Stowing configuration files"
-    
-    # Check if stow is installed
-    if ! command -v stow &> /dev/null; then
-        print_step "Installing GNU Stow..."
-        if [ "$DRY_RUN" = false ]; then
-            install_package "stow" "0"
-        else
-            print_warning "[DRY RUN] Would install: stow (via $PACKAGE_MANAGER)"
-        fi
-    fi
+link_configs() {
+    print_header "Linking configuration files"
     
     local OS=$(detect_os)
+    local DOTFILES_DIR=$(pwd)
+    
+    # Ensure ~/.config exists
+    mkdir -p "$HOME/.config"
     
     for component in "${SELECTED_COMPONENTS[@]}"; do
-        IFS=':' read -r display_name brew_pkg apt_pkg binary stow_dir is_cask <<< "$component"
+        IFS=':' read -r display_name brew_pkg apt_pkg binary config_dir is_cask <<< "$component"
+        
+        # Skip if no config directory (like fish deps)
+        if [ -z "$config_dir" ]; then
+            continue
+        fi
         
         echo ""
-        print_step "Stowing $display_name configs"
+        print_step "Linking $display_name configs"
         
         # Handle VSCode/Cursor specially (platform-specific paths)
-        if [ "$stow_dir" = "vscode" ]; then
-            stow_vscode_configs "$display_name" "$OS"
+        if [ "$config_dir" = "vscode" ]; then
+            link_vscode_configs "$display_name" "$OS" "$DOTFILES_DIR"
         else
-            # Regular stow to ~/.config
-            if [ -d "$stow_dir" ]; then
+            # Regular link to ~/.config
+            if [ -d "$DOTFILES_DIR/$config_dir" ]; then
+                local target="$HOME/.config/$config_dir"
+                
                 if [ "$DRY_RUN" = true ]; then
-                    print_warning "[DRY RUN] Would stow: $stow_dir → ~/.config/"
+                    print_warning "[DRY RUN] Would link: $config_dir → ~/.config/$config_dir"
                 else
-                    # Explicitly set target to avoid issues with .stowrc tilde expansion
-                    # Use --no-folding to prevent stow from creating individual file symlinks
-                    if stow --no-folding --target="$HOME/.config" "$stow_dir" 2>&1 | grep -q "already stowed\|conflicts"; then
-                        print_warning "Config already exists or conflicts, skipping"
+                    # Check if config already exists
+                    if [ -e "$target" ] && [ ! -L "$target" ]; then
+                        print_warning "$target exists and is not a symlink"
+                        print_warning "Please backup and remove it, then re-run this script"
+                        continue
+                    fi
+                    
+                    # Remove existing symlink if it exists
+                    if [ -L "$target" ]; then
+                        rm "$target"
+                    fi
+                    
+                    # Create the symlink
+                    ln -s "$DOTFILES_DIR/$config_dir" "$target"
+                    
+                    if [ -L "$target" ]; then
+                        print_info "✓ $display_name configs linked"
                     else
-                        print_info "✓ $display_name configs stowed"
+                        print_error "Failed to link $display_name configs"
                     fi
                 fi
             else
-                print_warning "No config directory found for $display_name (expected: $stow_dir/)"
+                print_warning "No config directory found for $display_name (expected: $config_dir/)"
             fi
         fi
     done
 }
 
-stow_vscode_configs() {
+link_vscode_configs() {
     local app_name=$1
     local os=$2
+    local dotfiles_dir=$3
     local target_dir=""
     
     case $os in
@@ -374,20 +440,36 @@ stow_vscode_configs() {
             ;;
     esac
     
-    if [ -d "$target_dir" ]; then
-        if [ "$DRY_RUN" = true ]; then
-            print_warning "[DRY RUN] Would stow: vscode → $target_dir"
-        else
-            if stow --no-folding --target="$target_dir" vscode 2>&1 | grep -q "already stowed\|conflicts"; then
-                print_warning "Config already exists or conflicts, skipping"
-            else
-                print_info "✓ $app_name configs stowed"
-            fi
-        fi
-    else
+    if [ ! -d "$target_dir" ]; then
         print_warning "$app_name directory not found at: $target_dir"
         print_warning "Install $app_name first, then re-run this script"
+        return
     fi
+    
+    if [ "$DRY_RUN" = true ]; then
+        print_warning "[DRY RUN] Would link vscode configs to: $target_dir"
+        return
+    fi
+    
+    # Link individual files from vscode directory
+    for file in "$dotfiles_dir/vscode"/*; do
+        local filename=$(basename "$file")
+        local target="$target_dir/$filename"
+        
+        # Skip if target exists and is not a symlink
+        if [ -e "$target" ] && [ ! -L "$target" ]; then
+            print_warning "$filename exists (not overwriting)"
+            continue
+        fi
+        
+        # Remove existing symlink
+        [ -L "$target" ] && rm "$target"
+        
+        # Create symlink
+        ln -s "$file" "$target"
+    done
+    
+    print_info "✓ $app_name configs linked"
 }
 
 # ============================================================================
@@ -541,6 +623,7 @@ OPTIONS:
     --dry-run           Show what would be installed without making changes
     --all               Auto-select all components (skip interactive menu)
     --non-interactive   Run in non-interactive mode (implies --all)
+    --unstow            Remove all stowed configurations
     -h, --help          Show this help message
 
 EXAMPLES:
@@ -548,8 +631,74 @@ EXAMPLES:
     $0 --dry-run            Preview what would be installed
     $0 --all --dry-run      Preview installing all components
     $0 --non-interactive    Install everything without prompts
+    $0 --unstow             Remove all symlinked configurations
+
+NOTES:
+    • Configs are symlinked as directories (e.g., ~/.config/nvim -> dotfiles/nvim/)
+    • Fish shell dependencies (eza, bat, fzf, zoxide, etc.) are optional but recommended
+    • Works with brew (macOS/Linux), apt-get, dnf, or pacman
 
 EOF
+}
+
+unlink_all() {
+    print_header "Unlinking all configurations"
+    
+    echo "This will remove all symlinked configurations."
+    read -p "Are you sure? [y/N] " -n 1 -r
+    echo
+    
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        print_info "Unlink cancelled"
+        exit 0
+    fi
+    
+    local packages=("fish" "nvim" "tmux" "wezterm" "starship" "lazygit")
+    
+    for pkg in "${packages[@]}"; do
+        local target="$HOME/.config/$pkg"
+        if [ -L "$target" ]; then
+            echo ""
+            print_step "Unlinking $pkg..."
+            rm "$target"
+            print_info "✓ $pkg unlinked"
+        fi
+    done
+    
+    # Unlink vscode/cursor
+    local OS=$(detect_os)
+    case $OS in
+        macos)
+            for dir in "Code" "Cursor"; do
+                local target="$HOME/Library/Application Support/$dir/User"
+                if [ -d "$target" ]; then
+                    for file in "$target"/*; do
+                        if [ -L "$file" ]; then
+                            rm "$file"
+                        fi
+                    done
+                    print_info "✓ $dir configs unlinked"
+                fi
+            done
+            ;;
+        linux)
+            for dir in "Code" "Cursor"; do
+                local target="$HOME/.config/$dir/User"
+                if [ -d "$target" ]; then
+                    for file in "$target"/*; do
+                        if [ -L "$file" ]; then
+                            rm "$file"
+                        fi
+                    done
+                    print_info "✓ $dir configs unlinked"
+                fi
+            done
+            ;;
+    esac
+    
+    echo ""
+    print_info "Unlink complete!"
+    echo "All symlinks have been removed."
 }
 
 main() {
@@ -565,6 +714,9 @@ main() {
             --non-interactive)
                 NON_INTERACTIVE=true
                 AUTO_SELECT_ALL=true
+                ;;
+            --unstow)
+                UNSTOW_MODE=true
                 ;;
             -h|--help)
                 show_usage
@@ -588,11 +740,17 @@ main() {
         print_warning "Running in DRY RUN mode - no changes will be made"
     fi
     
+    # Handle unstow mode
+    if [ "$UNSTOW_MODE" = true ]; then
+        unlink_all
+        exit 0
+    fi
+    
     # Run installation steps
     detect_package_manager
     select_components
     check_and_install_components
-    stow_configs
+    link_configs
     setup_fish_shell
     print_summary
 }

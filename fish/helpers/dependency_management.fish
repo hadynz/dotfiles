@@ -15,43 +15,103 @@ function check_missing_deps
     end
 end
 
+# Detect package manager
+function detect_package_manager
+    # Check for system package managers first (Linux)
+    if type -q apt-get
+        echo "apt"
+    else if type -q dnf
+        echo "dnf"
+    else if type -q pacman
+        echo "pacman"
+    else if type -q brew
+        echo "brew"
+    else
+        echo "none"
+    end
+end
+
+# Install packages based on package manager
+function install_deps_via_package_manager
+    set pkg_manager (detect_package_manager)
+    set missing_deps $argv
+    
+    # Map package names for different package managers
+    set apt_deps
+    for dep in $missing_deps
+        switch $dep
+            case zoxide
+                set -a apt_deps zoxide
+            case eza
+                set -a apt_deps eza
+            case fzf
+                set -a apt_deps fzf
+            case starship
+                echo "⚠️  starship: Install via: curl -sS https://starship.rs/install.sh | sh"
+            case bat
+                set -a apt_deps bat
+            case '*'
+                set -a apt_deps $dep
+        end
+    end
+    
+    switch $pkg_manager
+        case apt
+            echo "📦 Installing via apt-get: "(string join " " $apt_deps)
+            if test (id -u) -eq 0
+                apt-get update -qq && apt-get install -y $apt_deps
+            else
+                sudo apt-get update -qq && sudo apt-get install -y $apt_deps
+            end
+        case brew
+            echo "📦 Installing via Homebrew: "(string join " " $missing_deps)
+            brew install $missing_deps
+        case dnf
+            echo "📦 Installing via dnf: "(string join " " $apt_deps)
+            if test (id -u) -eq 0
+                dnf install -y $apt_deps
+            else
+                sudo dnf install -y $apt_deps
+            end
+        case pacman
+            echo "📦 Installing via pacman: "(string join " " $apt_deps)
+            if test (id -u) -eq 0
+                pacman -S --noconfirm $apt_deps
+            else
+                sudo pacman -S --noconfirm $apt_deps
+            end
+        case none
+            echo "❌ No package manager found (apt, dnf, pacman, or brew)"
+            echo "Please install dependencies manually"
+            return 1
+    end
+end
+
 # Main function to check and install dependencies
 function check_and_install_dependencies
     set missing_deps (check_missing_deps)
     
-    # If there are missing dependencies, check for brew and prompt for installation
+    # If there are missing dependencies, check for package manager and prompt for installation
     if test (count $missing_deps) -gt 0
-        # Check if brew is installed
-        if not type -q brew
-            echo "🍺 Homebrew is not installed or not in PATH."
-            echo "Please install Homebrew first: https://brew.sh/"
+        set pkg_manager (detect_package_manager)
+        
+        if test "$pkg_manager" = "none"
+            echo "❌ No supported package manager found."
+            echo "Please install: brew, apt-get, dnf, or pacman"
+            echo "Missing: "(string join ", " $missing_deps)
             return 1
         end
-        # Check if running as root (brew doesn't support root installation)
-        if test (id -u) -eq 0
-            echo "⚠️  Running as root detected. Homebrew cannot install packages as root."
-            echo "💡 Switch to a non-root user to install dependencies:"
-            echo "   su - your_username"
-            echo "   # or create a new user if needed:"
-            echo "   useradd -m -s /usr/bin/fish your_username"
-            echo "   su - your_username"
-            echo ""
-            echo "🔍 Missing dependencies that would be installed: "(string join ", " $missing_deps)
-            echo ""
-            echo "💡 After switching users, the dependency check will run automatically."
-            echo "   If you need to manually trigger it, run: check_and_install_dependencies"
-            return 1
-        end
+        
         echo "🔍 Missing dependencies detected: "(string join ", " $missing_deps)
-        echo -n "Would you like to install them via brew? [Y/n] "
+        echo "📦 Package manager: $pkg_manager"
+        echo -n "Would you like to install them? [Y/n] "
         read -l response
         
         # Default to 'yes' if empty response or 'Y'/'y'
         if test -z "$response"; or string match -qi "y*" "$response"
             echo "📦 Installing missing dependencies..."
-            echo "Running: brew install "(string join " " $missing_deps)
             
-            if brew install $missing_deps
+            if install_deps_via_package_manager $missing_deps
                 echo "🎉 All dependencies installation complete!"
                 echo ""
                 echo "💡 To apply changes, you can:"
