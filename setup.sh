@@ -337,7 +337,12 @@ stow_configs() {
                 if [ "$DRY_RUN" = true ]; then
                     print_warning "[DRY RUN] Would stow: $stow_dir → ~/.config/"
                 else
-                    stow "$stow_dir" 2>/dev/null && print_info "✓ $display_name configs stowed" || print_warning "Config already exists, skipping"
+                    # Explicitly set target to avoid issues with .stowrc tilde expansion
+                    if stow --target="$HOME/.config" "$stow_dir" 2>&1 | grep -q "already stowed\|conflicts"; then
+                        print_warning "Config already exists or conflicts, skipping"
+                    else
+                        print_info "✓ $display_name configs stowed"
+                    fi
                 fi
             else
                 print_warning "No config directory found for $display_name (expected: $stow_dir/)"
@@ -372,7 +377,11 @@ stow_vscode_configs() {
         if [ "$DRY_RUN" = true ]; then
             print_warning "[DRY RUN] Would stow: vscode → $target_dir"
         else
-            stow -t "$target_dir" vscode 2>/dev/null && print_info "✓ $app_name configs stowed" || print_warning "Config already exists, skipping"
+            if stow --target="$target_dir" vscode 2>&1 | grep -q "already stowed\|conflicts"; then
+                print_warning "Config already exists or conflicts, skipping"
+            else
+                print_info "✓ $app_name configs stowed"
+            fi
         fi
     else
         print_warning "$app_name directory not found at: $target_dir"
