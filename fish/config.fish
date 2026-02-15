@@ -46,8 +46,11 @@ end
 alias ll="eza --group --group-directories-first --git --long --all --sort=type"
 
 # fzf with preview - use 'fzfp' for fzf with bat preview
+# On Debian/Ubuntu, bat may be installed as "batcat"
 if type -q bat
     alias fzfp="fzf --preview 'bat --color=always --style=header,grid --line-range :500 -- {}'"
+else if type -q batcat
+    alias fzfp="fzf --preview 'batcat --color=always --style=header,grid --line-range :500 -- {}'"
 end
 
 # Git Aliases
