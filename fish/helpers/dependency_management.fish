@@ -11,7 +11,7 @@ function check_missing_deps
     
     # Only output if there are actually missing dependencies
     if test (count $missing_deps) -gt 0
-        echo $missing_deps
+        printf '%s\n' $missing_deps
     end
 end
 
@@ -88,44 +88,62 @@ function install_deps_via_package_manager
 end
 
 # Main function to check and install dependencies
+# When called manually (e.g. `deps`), always prompts.
+# When called from startup, only prompts on first login (uses universal variable to remember).
 function check_and_install_dependencies
+    set -l is_startup_check false
+    if contains -- --startup $argv
+        set is_startup_check true
+    end
+
     set missing_deps (check_missing_deps)
     
-    # If there are missing dependencies, check for package manager and prompt for installation
-    if test (count $missing_deps) -gt 0
-        set pkg_manager (detect_package_manager)
-        
-        if test "$pkg_manager" = "none"
-            echo "❌ No supported package manager found."
-            echo "Please install: brew, apt-get, dnf, or pacman"
-            echo "Missing: "(string join ", " $missing_deps)
+    # Nothing missing — clear the prompted flag so we re-prompt if new deps are added later
+    if test (count $missing_deps) -eq 0
+        set -e __fish_deps_prompted
+        return 0
+    end
+
+    set pkg_manager (detect_package_manager)
+
+    if test "$pkg_manager" = "none"
+        echo "❌ No supported package manager found."
+        echo "Please install: brew, apt-get, dnf, or pacman"
+        echo "Missing: "(string join ", " $missing_deps)
+        return 1
+    end
+
+    # On startup, skip the interactive prompt if user was already asked
+    if test "$is_startup_check" = true; and set -q __fish_deps_prompted
+        return 0
+    end
+
+    echo "🔍 Missing dependencies detected: "(string join ", " $missing_deps)
+    echo "📦 Package manager: $pkg_manager"
+    echo -n "Would you like to install them? [Y/n] "
+    read -l response
+
+    # Remember that we prompted (universal variable persists across sessions)
+    set -U __fish_deps_prompted true
+
+    # Default to 'yes' if empty response or 'Y'/'y'
+    if test -z "$response"; or string match -qi "y*" "$response"
+        echo "📦 Installing missing dependencies..."
+
+        if install_deps_via_package_manager $missing_deps
+            echo "🎉 All dependencies installation complete!"
+            echo ""
+            echo "💡 To apply changes, you can:"
+            echo "   • Restart your shell: exec fish"
+            echo "   • Source your config: source ~/.config/fish/config.fish"
+            echo "   • Or simply open a new terminal window"
+        else
+            echo "❌ Failed to install some dependencies."
+            echo "💡 You may need to install them manually or check for errors above."
             return 1
         end
-        
-        echo "🔍 Missing dependencies detected: "(string join ", " $missing_deps)
-        echo "📦 Package manager: $pkg_manager"
-        echo -n "Would you like to install them? [Y/n] "
-        read -l response
-        
-        # Default to 'yes' if empty response or 'Y'/'y'
-        if test -z "$response"; or string match -qi "y*" "$response"
-            echo "📦 Installing missing dependencies..."
-            
-            if install_deps_via_package_manager $missing_deps
-                echo "🎉 All dependencies installation complete!"
-                echo ""
-                echo "💡 To apply changes, you can:"
-                echo "   • Restart your shell: exec fish"
-                echo "   • Source your config: source ~/.config/fish/config.fish"
-                echo "   • Or simply open a new terminal window"
-            else
-                echo "❌ Failed to install some dependencies."
-                echo "💡 You may need to install them manually or check for errors above."
-                return 1
-            end
-        else
-            echo "⚠️  Skipping dependency installation. Some features may not work correctly."
-        end
+    else
+        echo "⚠️  Skipping dependency installation."
     end
 end
 

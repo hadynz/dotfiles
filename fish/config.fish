@@ -16,9 +16,10 @@ end
 
 # Check and install dependencies on first load
 # Only run this check if we're in an interactive session
+# --startup flag: only prompts on first login, then silently skips
 if status is-interactive
     show_welcome_banner
-    check_and_install_dependencies
+    check_and_install_dependencies --startup
     show_missing_deps_reminder
 end
 
