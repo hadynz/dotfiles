@@ -1,8 +1,9 @@
--- Ensure the config directory is in the runtime path when using symlinks
-local config_path = vim.fn.stdpath("config")
-if not vim.tbl_contains(vim.opt.runtimepath:get(), config_path) then
-  vim.opt.runtimepath:prepend(config_path)
-end
+-- Fix Lua module path for symlinked/stowed configs.
+-- Resolves based on the actual location of this init.lua file, which works in all
+-- deployment scenarios (stow, manual symlink, nvim -u, running from dotfiles repo).
+local this_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h")
+package.path = this_dir .. "/lua/?.lua;" .. this_dir .. "/lua/?/init.lua;" .. package.path
+vim.opt.runtimepath:prepend(this_dir)
 
 -- bootstrap lazy.nvim, LazyVim and your plugins
 require("config.lazy")
