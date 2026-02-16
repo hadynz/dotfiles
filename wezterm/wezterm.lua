@@ -18,6 +18,7 @@ local config = {
 	}),
 	line_height = 1.10,
 	use_cap_height_to_scale_fallback_fonts = true,
+  tab_max_width = 50,
 
 	macos_window_background_blur = 40,
 	window_background_opacity = 1,
