@@ -143,43 +143,15 @@ map("n", "dd", function()
   end
 end, { expr = true })
 
--- In insert mode, either move cursor right, or trigger next copilot suggestion
--- local move_right = function()
---   local copilot = require("copilot.suggestion")
---   if copilot.is_visible() then
---     copilot.next()
---     return
---   else
---     vim.cmd("normal! l")
---   end
--- end
--- -- In insert mode, either move cursor left, or trigger previous copilot suggestion
--- local move_left = function()
---   local copilot = require("copilot.suggestion")
---   if copilot.is_visible() then
---     copilot.prev()
---     return
---   else
---     vim.cmd("normal! h")
---   end
--- end
-
--- HJKL insert mode navigation
--- map("i", "<C-h>", move_left, { desc = "Move cursor left" })
--- map("i", "<C-j>", "<Down>", { desc = "Move cursor down" })
--- map("i", "<C-k>", "<Up>", { desc = "Move cursor up" })
--- map("i", "<C-l>", move_right, { desc = "Move cursor right" })
-
 -- LSP keymaps
--- map("n", "gr", telescope_builtin_utils.lsp_references, { desc = "Find all references" })
 map("n", "gR", vim.lsp.buf.rename, { desc = "Rename" })
 map("n", "<leader>rn", vim.lsp.buf.rename, { desc = "[R]e[n]ame" })
 map("n", "gA", LazyVim.lsp.action.source, { desc = "Source Action" })
 map("n", "gh", vim.diagnostic.open_float, { desc = "Line Diagnostics" })
-map("n", "go", LazyVim.lsp.action["source.organizeImports"], { desc = "Format" })
 map({ "n", "v" }, "==", function()
+  LazyVim.lsp.action["source.organizeImports"]()
   LazyVim.format({ force = true })
-end, { desc = "Format" })
+end, { desc = "Organize imports & Format" })
 
 -- Git
 map("n", "<Leader>gr", "<cmd>GitLink! default_branch<CR>", { desc = "Open Remote File (main)" })
