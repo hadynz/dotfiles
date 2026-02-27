@@ -36,7 +36,7 @@ alias canvas="cd $HOME/atlassian/canvas"
 #alias oldvi="vi"
 alias c="clear"
 alias nap="/Users/hosman/go/bin/nap"
-alias rovo="acli rovodev"
+alias rovo="acli rovodev tui --yolo --restore"
 
 if test -x /opt/homebrew/bin/fnm
     alias fnm="/opt/homebrew/bin/fnm"
@@ -119,4 +119,3 @@ set --export BUN_INSTALL "$HOME/.bun"
 set --export PATH $BUN_INSTALL/bin $PATH
 
 # proxmox-specific
-
