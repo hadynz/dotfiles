@@ -1,6 +1,7 @@
 return {
   "dmtrKovalenko/fff.nvim",
   build = "cargo build --release",
+  enabled = false,
   -- or if you are using nixos
   -- build = "nix run .#release",
   opts = { -- (optional)
