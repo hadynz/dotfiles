@@ -1,7 +1,9 @@
 return {
   "levouh/tint.nvim",
   -- enabled = false,
-  keys = {},
+  keys = {
+    { "<leader>ug", "<cmd>lua require('tint').toggle()<cr>", desc = "Toggle tint" },
+  },
   config = function(opts)
     local tint = require("tint")
 

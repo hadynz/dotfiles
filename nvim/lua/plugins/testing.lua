@@ -64,11 +64,13 @@ return {
       { "gJ",         debug_nearest,   desc = "Debug Test", },
 
       { "<leader>to", open,            desc = "Show Test Output", },
-      { "<leader>tn", run_nearest,     desc = "Run Test", },
+      { "<leader>tr", run_nearest,     desc = "Run Test", },
       { "<leader>tn", debug_nearest,   desc = "Debug Test", },
       { "<leader>tl", run_last_test,   desc = "Run Last Test", },
       { "<leader>tL", debug_last_test, desc = "Debug Last Test", },
       { "<leader>tw", watch,           desc = "Run Watch", },
+      { "<leader>td", "<cmd>:%s/\\<it\\.only\\>/it/g<cr>``", desc = "Delete `it.only` in file" },
+      { "<leader>ti", function() require("utils.testing").toggle_it_only() end, desc = "Toggle `it.only` on line" },
     },
   }
 }

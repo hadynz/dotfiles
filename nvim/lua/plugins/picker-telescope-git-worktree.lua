@@ -30,8 +30,10 @@ return {
 
   {
     "Mohanbarman/g-worktree.nvim",
-    opts = {
-
-    }
+    opts = {},
+    keys = {
+      { "<leader>gw", function() require("telescope").extensions.g_worktree.list() end, desc = "Switch git worktree" },
+      { "<leader>gW", function() require("telescope").extensions.g_worktree.create() end, desc = "Create git worktree" },
+    },
   },
 }

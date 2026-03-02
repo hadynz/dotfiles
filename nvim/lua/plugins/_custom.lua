@@ -1,7 +1,6 @@
 return {
   -- Install plugins (with no config)
   { "lbrayner/vim-rzip" }, -- Required for Yarn PnP
-  { "linrongbin16/gitlinker.nvim", cmd = "GitLink", opts = {} }, -- Open git files remotely
   { "sitiom/nvim-numbertoggle" }, -- Relative numbers on only for current buffer in Normal mode
   { "chrisgrieser/nvim-early-retirement", config = true, event = "VeryLazy" }, -- Auto-close inactive buffers
   { "navarasu/onedark.nvim" },
