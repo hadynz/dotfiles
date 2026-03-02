@@ -201,7 +201,7 @@ map({ "n", "v" }, "<Leader>yl", function()
   end
 end, { desc = "Copy relative file path with line numbers" })
 
---- TMUX navigation
+--- Window navigation (smart-splits)
 map({ "n", "v" }, "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", { desc = "Go to left window" })
 map({ "n", "v" }, "<C-j>", "<cmd>lua require'smart-splits'.move_cursor_down()<cr>", { desc = "Go to lower window" })
 map({ "n", "v" }, "<C-k>", "<cmd>lua require'smart-splits'.move_cursor_up()<cr>", { desc = "Go to upper window" })
