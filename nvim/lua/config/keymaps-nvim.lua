@@ -50,9 +50,7 @@ map("n", "<leader>w-", "<C-w>s", { desc = "Split horizontal" })
 map("n", "<leader>Ll", "<cmd>Lazy<CR>", { desc = "lazy.nvim" })
 map("n", "<leader>Lm", "<cmd>Mason<CR>", { desc = "Mason" })
 map("n", "<leader>Le", "<cmd>LazyExtras<CR>", { desc = "LazyVim Extras" })
-map("n", "<leader>LL", function()
-  LazyVim.news.changelog()
-end, { desc = "lazy.nvim Changelog" })
+map("n", "<leader>LL", function() LazyVim.news.changelog() end, { desc = "lazy.nvim Changelog" })
 
 -- Redo
 map("n", "U", "<C-r>", { desc = "Redo" })
@@ -65,12 +63,8 @@ map("n", "<C-]>", "<C-I>", { desc = "Navigate forward" })
 map("n", "ge", "<cmd>b#<CR>", { desc = "Switch back" })
 
 -- Git Worktree management
-map("n", "<leader>gw", function()
-  require("telescope").extensions.g_worktree.list()
-end, { desc = "Switch git worktree" })
-map("n", "<leader>gW", function()
-  require("telescope").extensions.g_worktree.create()
-end, { desc = "Create git worktree" })
+map("n", "<leader>gw", function() require("telescope").extensions.g_worktree.list() end, { desc = "Switch git worktree" })
+map("n", "<leader>gW", function() require("telescope").extensions.g_worktree.create() end, { desc = "Create git worktree" })
 
 -- Using change without yank
 map({ "n", "v" }, "c", '"_c', { desc = "Change without yank" })
@@ -98,9 +92,7 @@ map({ "n", "i" }, "<Esc>", function()
   vim.cmd([[nohl]]) -- clear highlight of search
   vim.cmd([[stopinsert]]) -- clear messages (the line below statusline)
   for _, win in ipairs(vim.api.nvim_list_wins()) do -- clear all floating windows
-    if vim.api.nvim_win_get_config(win).relative == "win" then
-      vim.api.nvim_win_close(win, false)
-    end
+    if vim.api.nvim_win_get_config(win).relative == "win" then vim.api.nvim_win_close(win, false) end
   end
   require("snacks.notifier").hide()
 end, { desc = "Clear highlight search, messages, floating windows" })
@@ -122,12 +114,8 @@ local keep_cursor_centered = function(jk_direction)
 end
 
 -- Keep cursor centered when navigating
-map("n", "k", function()
-  keep_cursor_centered("k")
-end, { desc = "Keep cursor centered on up" })
-map("n", "j", function()
-  keep_cursor_centered("j")
-end, { desc = "Keep cursor centered on down" })
+map("n", "k", function() keep_cursor_centered("k") end, { desc = "Keep cursor centered on up" })
+map("n", "j", function() keep_cursor_centered("j") end, { desc = "Keep cursor centered on down" })
 map("n", "G", "Gzz", { desc = "Keep cursor centered on page end" })
 map("n", "<C-u>", "<C-u>zz", { desc = "Keep cursor centered on page up" })
 map("n", "<C-d>", "<C-d>zz", { desc = "Keep cursor centered on page down" })
@@ -198,14 +186,8 @@ local copy_file_path_with_lines = function(path)
   vim.notify("Copied: " .. path_with_lines)
 end
 
-map({ "n", "v" }, "<Leader>yp", function()
-  copy_file_path(vim.fn.expand("%"))
-end, { desc = "Copy relative file path" })
-
-map({ "n", "v" }, "<Leader>yP", function()
-  copy_file_path(vim.fn.expand("%:p"))
-end, { desc = "Copy absolute file path" })
-
+map({ "n", "v" }, "<Leader>yp", function() copy_file_path(vim.fn.expand("%")) end, { desc = "Copy relative file path" })
+map({ "n", "v" }, "<Leader>yP", function() copy_file_path(vim.fn.expand("%:p")) end, { desc = "Copy absolute file path" })
 map({ "n", "v" }, "<Leader>yl", function()
   local path = vim.fn.expand("%")
   if vim.fn.mode() == "v" or vim.fn.mode() == "V" or vim.fn.mode() == "\22" then
@@ -220,10 +202,10 @@ map({ "n", "v" }, "<Leader>yl", function()
 end, { desc = "Copy relative file path with line numbers" })
 
 --- TMUX navigation
-map("n", "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", { desc = "Go to left window" })
-map("n", "<C-j>", "<cmd>lua require'smart-splits'.move_cursor_down()<cr>", { desc = "Go to lower window" })
-map("n", "<C-k>", "<cmd>lua require'smart-splits'.move_cursor_up()<cr>", { desc = "Go to upper window" })
-map("n", "<C-l>", "<cmd>lua require'smart-splits'.move_cursor_right()<cr>", { desc = "Go to right window" })
+map({ "n", "v" }, "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", { desc = "Go to left window" })
+map({ "n", "v" }, "<C-j>", "<cmd>lua require'smart-splits'.move_cursor_down()<cr>", { desc = "Go to lower window" })
+map({ "n", "v" }, "<C-k>", "<cmd>lua require'smart-splits'.move_cursor_up()<cr>", { desc = "Go to upper window" })
+map({ "n", "v" }, "<C-l>", "<cmd>lua require'smart-splits'.move_cursor_right()<cr>", { desc = "Go to right window" })
 map("n", "<C-Up>", "<cmd>lua require'smart-splits'.resize_up()<cr>", { desc = "Resize top" })
 map("n", "<C-Down>", "<cmd>lua require'smart-splits'.resize_down()<cr>", { desc = "Resize bottom" })
 map("n", "<C-Left>", "<cmd>lua require'smart-splits'.resize_left()<cr>", { desc = "Resize left" })
