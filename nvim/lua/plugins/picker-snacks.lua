@@ -15,21 +15,15 @@ local function get_git_root_directory(path)
     return stat and stat.type == "directory"
   end
 
-  local function get_parent_directory(dir)
-    return vim.fn.fnamemodify(dir, ":h")
-  end
+  local function get_parent_directory(dir) return vim.fn.fnamemodify(dir, ":h") end
 
   local directories = {}
   local current_dir = path
   while current_dir do
     table.insert(directories, current_dir)
-    if is_git_repo(current_dir) then
-      break
-    end
+    if is_git_repo(current_dir) then break end
     local parent_dir = get_parent_directory(current_dir)
-    if parent_dir == current_dir then
-      break
-    end
+    if parent_dir == current_dir then break end
     current_dir = parent_dir
   end
 
@@ -49,9 +43,7 @@ local grep_current_buffer_dirs = function()
   -- Present the directories to the user for selection
   vim.ui.select(directories, {
     prompt = "Select directory to Grep:",
-    format_item = function(item)
-      return item
-    end,
+    format_item = function(item) return item end,
   }, function(choice)
     if choice then
       Snacks.picker.grep({ dirs = { choice } })
@@ -98,62 +90,48 @@ return {
     { "<leader><space>", false },
     { "<leader>.", false },
     { "<leader>S", false },
+    { "<leader>gd", false },
+    { "<leader>gD", false },
 
     -- Picker
     {
       "<F5>",
-      function()
-        Snacks.picker.smart()
-      end,
+      function() Snacks.picker.smart() end,
       desc = "Smart Find Files",
     },
     {
       "<C-p>",
-      function()
-        Snacks.picker.smart()
-      end,
+      function() Snacks.picker.smart() end,
       desc = "Smart Find Files",
     },
     {
       "<leader>.",
-      function()
-        Snacks.picker.grep_word()
-      end,
+      function() Snacks.picker.grep_word() end,
       desc = "Grep word under cursor",
     },
     {
       "<leader>E",
-      function()
-        Snacks.explorer()
-      end,
+      function() Snacks.explorer() end,
       desc = "Show explorer",
     },
     {
       "<leader>gt",
-      function()
-        Snacks.picker.git_status()
-      end,
+      function() Snacks.picker.git_status() end,
       desc = "List modified git files",
     },
     {
       "<leader><leader>g",
-      function()
-        Snacks.picker.git_status()
-      end,
+      function() Snacks.picker.git_status() end,
       desc = "List modified git files",
     },
     {
       "<leader><leader>b",
-      function()
-        Snacks.picker.buffers()
-      end,
+      function() Snacks.picker.buffers() end,
       desc = "Open buffers",
     },
     {
       "<leader><leader>r",
-      function()
-        Snacks.picker.recent()
-      end,
+      function() Snacks.picker.recent() end,
       desc = "Recent files",
     },
 
@@ -167,9 +145,7 @@ return {
         -- ----- helpers -----
         local function git_root()
           local out = vim.fn.systemlist({ "git", "rev-parse", "--show-toplevel" })
-          if vim.v.shell_error == 0 and out[1] and out[1] ~= "" then
-            return out[1]
-          end
+          if vim.v.shell_error == 0 and out[1] and out[1] ~= "" then return out[1] end
           return vim.loop.cwd()
         end
 
@@ -197,9 +173,7 @@ return {
             if vim.v.shell_error == 0 then
               -- Now make sure there's a valid merge-base
               local mb = vim.fn.systemlist({ "git", "merge-base", "HEAD", ref })[1]
-              if mb and mb ~= "" then
-                return ref
-              end
+              if mb and mb ~= "" then return ref end
             end
           end
 
@@ -208,9 +182,7 @@ return {
 
         local function merge_base(base)
           local out = run_git({ "merge-base", "HEAD", base })
-          if out[1] and out[1] ~= "" then
-            return out[1]
-          end
+          if out[1] and out[1] ~= "" then return out[1] end
           return nil
         end
 
@@ -257,27 +229,19 @@ return {
         Snacks.picker({
           title = "Changed vs main",
           items = items,
-          format = function(item)
-            return { { item.text } }
-          end, -- show repo-root-relative path
+          format = function(item) return { { item.text } } end, -- show repo-root-relative path
           confirm = function(picker, item)
             picker:close()
-            picker:norm(function()
-              vim.cmd.edit(vim.fn.fnameescape(item.file))
-            end)
+            picker:norm(function() vim.cmd.edit(vim.fn.fnameescape(item.file)) end)
           end,
           actions = {
             ["ctrl-v"] = function(picker, item)
               picker:close()
-              picker:norm(function()
-                vim.cmd.vsplit(vim.fn.fnameescape(item.file))
-              end)
+              picker:norm(function() vim.cmd.vsplit(vim.fn.fnameescape(item.file)) end)
             end,
             ["ctrl-x"] = function(picker, item)
               picker:close()
-              picker:norm(function()
-                vim.cmd.split(vim.fn.fnameescape(item.file))
-              end)
+              picker:norm(function() vim.cmd.split(vim.fn.fnameescape(item.file)) end)
             end,
           },
         })
@@ -287,16 +251,12 @@ return {
     -- Scratch
     {
       "<F9>",
-      function()
-        require("utils.snacks.scratch").new_scratch(filetypes)
-      end,
+      function() require("utils.snacks.scratch").new_scratch(filetypes) end,
       desc = "Toggle Scratch Buffer",
     },
     {
       "<F10>",
-      function()
-        require("utils.snacks.scratch").select_scratch()
-      end,
+      function() require("utils.snacks.scratch").select_scratch() end,
       desc = "Select Scratch Buffer",
     },
   },
