@@ -1,39 +1,64 @@
-local function switch_worktrees()
-  require("telescope").extensions.git_worktree.git_worktrees()
-end
-
-local function create_worktrees()
-  require("telescope").extensions.git_worktree.create_git_worktree()
-end
-
-local function on_switch_worktrees()
-  local Worktree = require("git-worktree")
-end
-
 return {
   {
-    "polarmutex/git-worktree.nvim",
-    enabled = false,
-    -- branch = "handle_changes_in_telescope_api",
-    dependencies = {
-      "nvim-telescope/telescope.nvim",
-      config = function()
-        require("telescope").load_extension("git_worktree")
-        on_switch_worktrees()
-      end,
-    },
-    keys = {
-      { "<leader>gw", switch_worktrees, desc = "Switch git worktree" },
-      { "<leader>gW", create_worktrees, desc = "Create git worktree" },
+    "folke/which-key.nvim",
+    opts = {
+      spec = {
+        { "<leader>gw", group = "worktrees" },
+      },
     },
   },
 
   {
-    "Mohanbarman/g-worktree.nvim",
-    opts = {},
+    "polarmutex/git-worktree.nvim",
+    enabled = false,
+    version = "^2",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    opts = {
+      change_directory_command = "cd",
+      update_on_change = true,
+      update_on_change_command = "e .",
+      clearjumps_on_change = true,
+      autopush = false,
+    },
     keys = {
-      { "<leader>gw", function() require("telescope").extensions.g_worktree.list() end, desc = "Switch git worktree" },
-      { "<leader>gW", function() require("telescope").extensions.g_worktree.create() end, desc = "Create git worktree" },
+      {
+        "<leader>gws",
+        function() require("snacks-worktree").pick_git_worktree() end,
+        desc = "Pick Git Worktree",
+      },
+      {
+        "<leader>gwc",
+        function() require("snacks-worktree").create_worktree() end,
+        desc = "Create Git Worktree",
+      },
+    },
+  },
+
+  {
+    "afonsofrancof/worktrees.nvim",
+    event = "VeryLazy",
+    opts = {
+      -- Specify where to create worktrees relative to git common dir
+      -- The common dir is the .git dir in a normal repo or the root dir of a bare repo
+      base_path = "../../canvas-worktrees", -- Parent directory of common dir
+
+      -- Template for worktree folder names
+      -- This is only used if you don't specify the folder name when creating the worktree
+      path_template = "{branch}", -- Default: use branch name
+
+      -- Command names (optional)
+      commands = {
+        create = "WorktreeCreate",
+        delete = "WorktreeDelete",
+        switch = "WorktreeSwitch",
+      },
+
+      -- Key mappings for interactive UI (optional)
+      mappings = {
+        create = "<leader>gwc",
+        delete = "<leader>gwd",
+        switch = "<leader>gws",
+      },
     },
   },
 }
