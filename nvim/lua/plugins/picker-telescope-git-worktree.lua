@@ -20,18 +20,6 @@ return {
       clearjumps_on_change = true,
       autopush = false,
     },
-    keys = {
-      {
-        "<leader>gws",
-        function() require("snacks-worktree").pick_git_worktree() end,
-        desc = "Pick Git Worktree",
-      },
-      {
-        "<leader>gwc",
-        function() require("snacks-worktree").create_worktree() end,
-        desc = "Create Git Worktree",
-      },
-    },
   },
 
   {
@@ -55,7 +43,7 @@ return {
 
       -- Key mappings for interactive UI (optional)
       mappings = {
-        create = "<leader>gwc",
+        create = "<leader>gwn",
         delete = "<leader>gwd",
         switch = "<leader>gws",
       },
