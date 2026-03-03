@@ -31,6 +31,7 @@ map("n", "<leader>w\\", "<C-w>v", { desc = "Split vertical" })
 map("n", "<leader>w-", "<C-w>s", { desc = "Split horizontal" })
 
 -- LazyVim distro keymaps
+require("which-key").add({ { "<leader>L", group = "LazyVim" } })
 map("n", "<leader>Ll", "<cmd>Lazy<CR>", { desc = "lazy.nvim" })
 map("n", "<leader>Lm", "<cmd>Mason<CR>", { desc = "Mason" })
 map("n", "<leader>Le", "<cmd>LazyExtras<CR>", { desc = "LazyVim Extras" })
@@ -113,6 +114,7 @@ map("v", "p", "P", { noremap = true, silent = true })
 map("v", "<LeftRelease>", '"*ygv', { desc = "Mouse selection copies to clipboard" })
 
 -- Copy file path to clipboard
+require("which-key").add({ { "<leader>y", group = "paste" } })
 map({ "n", "v" }, "<Leader>yp", function() clipboard.copy_file_path(vim.fn.expand("%")) end, { desc = "Copy relative file path" })
 map({ "n", "v" }, "<Leader>yP", function() clipboard.copy_file_path(vim.fn.expand("%:p")) end, { desc = "Copy absolute file path" })
 map({ "n", "v" }, "<Leader>yl", function() clipboard.copy_file_path_smart(vim.fn.expand("%")) end, { desc = "Copy relative file path with line numbers" })

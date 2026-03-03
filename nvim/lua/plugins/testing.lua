@@ -12,6 +12,14 @@ return {
     enabled = false,
   },
   {
+    "folke/which-key.nvim",
+    opts = {
+      spec = {
+        { "<leader>t", group = "testing" },
+      },
+    },
+  },
+  {
     "nvim-neotest/neotest",
     event = "LspAttach",
     dependencies = {
