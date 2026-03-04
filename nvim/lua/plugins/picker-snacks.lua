@@ -92,6 +92,7 @@ return {
     { "<leader>S", false },
     { "<leader>gd", false },
     { "<leader>gD", false },
+    { "<leader>gf", false },
 
     -- Picker
     {
@@ -134,6 +135,8 @@ return {
       function() Snacks.picker.recent() end,
       desc = "Recent files",
     },
+
+    { "<leader>gh", function() Snacks.picker.git_log_file() end },
 
     -- Custom Pickers: Search open buffers
     { "<leader>sx", grep_current_buffer_dirs, desc = "Grep (current Buffer Dirs)" },
