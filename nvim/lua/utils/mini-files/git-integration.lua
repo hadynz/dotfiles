@@ -51,6 +51,9 @@ end
 
 local function updateMiniWithGit(buf_id, gitStatusMap)
   vim.schedule(function()
+    if not vim.api.nvim_buf_is_valid(buf_id) then
+      return
+    end
     local nlines = vim.api.nvim_buf_line_count(buf_id)
     local root_dir = vim.fs.root(vim.fn.getcwd(), ".git")
     local escaped_root_dir = escapePattern(root_dir)
@@ -125,14 +128,19 @@ local function updateGitStatus(buf_id)
   if not is_valid_git_repo() then
     return
   end
-  local cwd = vim.fn.expand("%:p:h")
+  -- Use the git root directory instead of the buffer's directory to avoid issues
+  -- with mini-files virtual buffer paths (minifiles://...)
+  local root_dir = vim.fs.root(vim.fn.getcwd(), ".git")
+  if not root_dir or root_dir == "" then
+    return
+  end
   local currentTime = os.time()
-  if gitStatusCache[cwd] and currentTime - gitStatusCache[cwd].time < cacheTimeout then
-    updateMiniWithGit(buf_id, gitStatusCache[cwd].statusMap)
+  if gitStatusCache[root_dir] and currentTime - gitStatusCache[root_dir].time < cacheTimeout then
+    updateMiniWithGit(buf_id, gitStatusCache[root_dir].statusMap)
   else
-    fetchGitStatus(cwd, function(content)
+    fetchGitStatus(root_dir, function(content)
       local gitStatusMap = parseGitStatus(content)
-      gitStatusCache[cwd] = {
+      gitStatusCache[root_dir] = {
         time = currentTime,
         statusMap = gitStatusMap,
       }
@@ -172,9 +180,9 @@ autocmd("User", {
   pattern = "MiniFilesBufferUpdate",
   callback = function(sii)
     local bufnr = sii.data.buf_id
-    local cwd = vim.fn.expand("%:p:h")
-    if gitStatusCache[cwd] then
-      updateMiniWithGit(bufnr, gitStatusCache[cwd].statusMap)
+    local root_dir = vim.fs.root(vim.fn.getcwd(), ".git")
+    if root_dir and root_dir ~= "" and gitStatusCache[root_dir] then
+      updateMiniWithGit(bufnr, gitStatusCache[root_dir].statusMap)
     end
   end,
 })
