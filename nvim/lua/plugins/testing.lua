@@ -21,7 +21,6 @@ return {
   },
   {
     "nvim-neotest/neotest",
-    event = "LspAttach",
     dependencies = {
       "nvim-treesitter/nvim-treesitter",
       "nvim-neotest/neotest-jest"
@@ -32,24 +31,40 @@ return {
       },
       adapters = {
         ["neotest-jest"] = {
-          jestCommand = "npm test --",
-          -- jestConfigFile = function(file)
-          --   if string.find(file, "/packages/") then
-          --     local bla = string.match(file, "(.-/[^/]+/)src") .. "jest.config.ts"
-          --     print("1. jestConfigFile: " .. bla)
-          --     return bla
-          --   end
+          jestCommand = function(path)
+            -- Match test file patterns to their corresponding yarn commands
+            local matchers = {
+              { pattern = "%.world%.test%.ts$", cmd = "yarn jest -c jest-config/jest.world.ts" },
+              { pattern = "%.test%.tsx?$", cmd = "yarn jest -c jest-config/jest.config.ts" },
+              { pattern = "%.looper%.localdev%.integration%.ts$", cmd = "yarn test:it:local-dev:looper" },
+              { pattern = "%.localdev%.integration%.ts$", cmd = "yarn test:it:local-dev" },
+              { pattern = "%.integration%.tsx?$", cmd = "yarn test:it:services" },
+            }
 
-          --   local path = vim.fn.getcwd() .. "/jest.config.ts"
-          --   print("2a. jestConfigFile: " .. path)
-          --   print("2b. file: " .. file)
-          --   print("2c. cwd: " .. vim.fn.getcwd())
-          --   return path
-          -- end,
-          -- -- env = { CI = true },
+            for _, m in ipairs(matchers) do
+              if path:match(m.pattern) then
+                return m.cmd
+              end
+            end
+
+            -- Fallback
+            return "yarn jest"
+          end,
+          -- Let jest resolve its own config since jestCommand handles it
+          jestConfigFile = function() return nil end,
+          isTestFile = function(file_path)
+            if not file_path then return false end
+            return file_path:match("%.world%.test%.ts$") ~= nil
+              or file_path:match("%.test%.tsx?$") ~= nil
+              or file_path:match("%.spec%.tsx?$") ~= nil
+              or file_path:match("%.looper%.localdev%.integration%.ts$") ~= nil
+              or file_path:match("%.localdev%.integration%.ts$") ~= nil
+              or file_path:match("%.integration%.tsx?$") ~= nil
+              or file_path:match("__tests__") ~= nil
+          end,
           cwd = function(path)
-            local root_path = require("lspconfig").util.root_pattern "package.json" (path)
-            return root_path or vim.fn.getcwd()
+            local git_root = require("lspconfig").util.root_pattern(".git")(path)
+            return git_root or vim.fn.getcwd()
           end,
         }
       },
