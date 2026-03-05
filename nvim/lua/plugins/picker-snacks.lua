@@ -90,6 +90,8 @@ return {
     { "<leader><space>", false },
     { "<leader>.", false },
     { "<leader>S", false },
+    { "<leader>N", function() Snacks.notifier.show_history() end, desc = "Notification History Buffer" },
+    
     { "<leader>gd", false },
     { "<leader>gD", false },
     { "<leader>gf", false },
