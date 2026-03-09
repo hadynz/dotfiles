@@ -46,6 +46,10 @@ return {
         -- Set new <leader>gH* binding
         map(m[1], "<leader>gH" .. m[2], m[3], m[4])
       end
+
+      -- Navigate between git changes
+      map("n", "]c", function() gs.nav_hunk("next") end, "Next Git Change")
+      map("n", "[c", function() gs.nav_hunk("prev") end, "Previous Git Change")
     end
   end,
   },
