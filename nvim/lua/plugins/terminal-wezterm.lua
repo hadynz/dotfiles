@@ -2,6 +2,11 @@ return {
   {
     "mrjones2014/smart-splits.nvim",
     lazy = false,
+    opts = {
+      at_edge = function(ctx)
+        require("utils.hopscotch").spatial(ctx.direction)
+      end,
+    },
     keys = {
       { "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", mode = { "n", "v" }, desc = "Go to left window" },
       { "<C-j>", "<cmd>lua require'smart-splits'.move_cursor_down()<cr>", mode = { "n", "v" }, desc = "Go to lower window" },

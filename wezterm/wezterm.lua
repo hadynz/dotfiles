@@ -1,10 +1,5 @@
 local wezterm = require("wezterm")
 local weztermSmartSplitsConfig = require("wezterm-smart-splits")
--- local weztermMoveConfig = require("wezterm-move")
-
-local function isViProcess(pane)
-	return pane:get_title():find("n?vim") ~= nil
-end
 
 local config = {
 	color_scheme = "Catppuccin Frappe",
@@ -217,7 +212,6 @@ for i = 1, 8 do
 	})
 end
 
--- weztermMoveConfig.apply_to_config(config)
 weztermSmartSplitsConfig.apply_to_config(config)
 
 return config
