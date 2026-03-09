@@ -5,6 +5,7 @@ return {
     cmd = "CodeDiff",
     keys = {
       { "<leader>gd", "<cmd>CodeDiff<cr>", desc = "Code Diff" },
+      { "<leader>gh", "<cmd>CodeDiff history<cr>", desc = "Code Diff History" },
     },
   },
 }
