@@ -15,7 +15,7 @@ return {
     require("utils.mini-files.git-integration")
     require("mini.files").setup({
       content = {
-        filter = f.filter_hide,
+        filter = f.filter_show,
       },
       mappings = {
         close = "<Esc>",

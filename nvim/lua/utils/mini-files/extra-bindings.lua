@@ -3,7 +3,7 @@ local MiniFiles = require("mini.files")
 M = {}
 
 -- Auto command to add `g.` binding to toggle dot files
-local show_dotfiles = true
+local show_dotfiles = false
 
 function M.filter_show()
   return true
