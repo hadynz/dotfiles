@@ -25,6 +25,13 @@ return {
         desc = "Show worktree picker on startup if worktrees exist",
       })
     end,
+    config = function(_, opts)
+      require("worktrees").setup(opts)
+
+      local worktree_utils = require("utils.worktree")
+      vim.api.nvim_create_user_command("WorktreeDeleteAll", worktree_utils.delete_all, { desc = "Delete all worktrees except current" })
+      vim.keymap.set("n", "<leader>gwD", "<cmd>WorktreeDeleteAll<cr>", { desc = "Delete All Worktrees" })
+    end,
     opts = {
       -- Specify where to create worktrees relative to git common dir
       -- The common dir is the .git dir in a normal repo or the root dir of a bare repo
