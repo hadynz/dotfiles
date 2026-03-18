@@ -48,8 +48,20 @@ return {
       end
 
       -- Navigate between git changes
-      map("n", "]c", function() gs.nav_hunk("next") end, "Next Git Change")
-      map("n", "[c", function() gs.nav_hunk("prev") end, "Previous Git Change")
+      map("n", "]c", function()
+        if vim.wo.diff then
+          vim.cmd.normal({ "]c", bang = true })
+        else
+          gs.nav_hunk("next", { wrap = true })
+        end
+      end, "Next Git Change")
+      map("n", "[c", function()
+        if vim.wo.diff then
+          vim.cmd.normal({ "[c", bang = true })
+        else
+          gs.nav_hunk("prev", { wrap = true })
+        end
+      end, "Previous Git Change")
     end
   end,
   },
