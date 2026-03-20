@@ -19,6 +19,15 @@ local toggle_dotfiles = function()
   MiniFiles.refresh({ content = { filter = new_filter } })
 end
 
+local go_to_git_root = function()
+  local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+  if vim.v.shell_error ~= 0 or not git_root then
+    vim.notify("Not in a git repository", vim.log.levels.WARN)
+    return
+  end
+  MiniFiles.open(git_root)
+end
+
 local open_current_directory = function()
   local cur_entry_path = MiniFiles.get_fs_entry().path
   local cur_directory = vim.fs.dirname(cur_entry_path)
@@ -56,7 +65,8 @@ vim.api.nvim_create_autocmd("User", {
     vim.keymap.set("n", "g.", toggle_dotfiles, { buffer = buf_id })
     vim.keymap.set("n", "go", open_current_directory, { buffer = buf_id })
     vim.keymap.set("n", "q", MiniFiles.close, { buffer = buf_id })
-    vim.keymap.set("n", "-", MiniFiles.go_out, { buffer = buf_id })
+    vim.keymap.set("n", "-", MiniFiles.go_out, { buffer = buf_id, desc = "Go out (parent dir)" })
+    vim.keymap.set("n", "_", go_to_git_root, { buffer = buf_id, desc = "Go to git root" })
     vim.keymap.set("n", "h", MiniFiles.go_out, { buffer = buf_id })
 
     -- map_split(buf_id, "-", "belowright horizontal")
