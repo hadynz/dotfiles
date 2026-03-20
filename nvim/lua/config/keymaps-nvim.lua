@@ -31,7 +31,11 @@ map("n", "<leader>w\\", "<C-w>v", { desc = "Split vertical" })
 map("n", "<leader>w-", "<C-w>s", { desc = "Split horizontal" })
 
 -- LazyVim distro keymaps
-require("which-key").add({ { "<leader>L", group = "LazyVim" } })
+require("which-key").add({
+  { "<leader>L", group = "LazyVim" },
+  { "<leader>D", group = "Debug" },
+  { "<leader>d", group = "Diff" },
+})
 map("n", "<leader>Ll", "<cmd>Lazy<CR>", { desc = "lazy.nvim" })
 map("n", "<leader>Lm", "<cmd>Mason<CR>", { desc = "Mason" })
 map("n", "<leader>Le", "<cmd>LazyExtras<CR>", { desc = "LazyVim Extras" })
@@ -53,9 +57,6 @@ map({ "n", "v" }, "C", '"_C', { desc = "Change without yank" })
 
 -- Using char delete without yank
 map({ "n", "v" }, "x", '"_x', { desc = "Char delete without yank" })
-
--- Using delete without yank
-map({ "n", "v" }, "<leader>d", '"_d', { desc = "Delete without yank" })
 
 -- Disable default `s` keybind - reusing it for `hop`
 map("n", "s", "<nop>", { desc = "Disable default `s` keybind" })
