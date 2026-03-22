@@ -30,7 +30,7 @@ UNSTOW_MODE=false
 # Note: "MANUAL" means requires special installation steps, "N/A" means not available
 declare -a COMPONENTS=(
     "Fish Shell:fish:fish:fish:fish:0"
-    "Neovim:neovim:neovim:nvim:nvim:0"
+    "Neovim:neovim:MANUAL:nvim:nvim:0"
     "Tmux:tmux:tmux:tmux:tmux:0"
     "Lazygit:jesseduffield/lazygit/lazygit:lazygit:lazygit:lazygit:0"
     "Starship:starship:MANUAL:starship:starship:0"
@@ -298,6 +298,45 @@ install_package() {
     esac
 }
 
+# ============================================================================
+# Custom Installers (for components not available via package manager)
+# Named install_<binary>_manual to match the convention in check_and_install_components
+# ============================================================================
+
+install_nvim_manual() {
+    local arch=$(uname -m)
+    case "$arch" in
+        x86_64)  arch="x86_64" ;;
+        aarch64) arch="arm64" ;;
+        *)
+            print_error "Unsupported architecture: $arch"
+            return 1
+            ;;
+    esac
+
+    local tarball="nvim-linux-${arch}.tar.gz"
+    local url="https://github.com/neovim/neovim/releases/latest/download/${tarball}"
+
+    print_step "Downloading latest Neovim for ${arch}..."
+    curl -fLo "/tmp/${tarball}" "$url" || { print_error "Download failed"; return 1; }
+
+    print_step "Extracting to /opt/nvim..."
+    sudo rm -rf /opt/nvim
+    sudo tar -C /opt -xzf "/tmp/${tarball}" || { print_error "Extraction failed"; return 1; }
+    sudo mv /opt/nvim-linux-${arch} /opt/nvim
+
+    # Add to PATH via /usr/local/bin symlink
+    sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+
+    rm -f "/tmp/${tarball}"
+    print_info "Neovim installed: $(nvim --version | head -n1)"
+}
+
+install_starship_manual() {
+    print_step "Installing Starship via official installer..."
+    curl -sS https://starship.rs/install.sh | sh -s -- -y
+}
+
 check_and_install_components() {
     print_header "Checking and installing components"
     
@@ -329,8 +368,24 @@ check_and_install_components() {
         
         # Check if package requires manual installation
         if [ "$package_name" = "MANUAL" ]; then
-            print_warning "$display_name requires manual installation via $PACKAGE_MANAGER"
-            MANUAL_INSTALL_NEEDED+=("$display_name")
+            # Attempt auto-install for known components
+            if command -v "$binary" &> /dev/null; then
+                local version=$($binary --version 2>/dev/null | head -n1 || echo "installed")
+                print_info "$display_name already installed: $version"
+            elif [ "$DRY_RUN" = true ]; then
+                print_warning "[DRY RUN] Would install $display_name via custom installer"
+            elif type "install_${binary}_manual" &>/dev/null; then
+                print_step "Installing $display_name via custom installer..."
+                if "install_${binary}_manual"; then
+                    print_info "$display_name installed successfully"
+                else
+                    print_error "Failed to install $display_name"
+                    MANUAL_INSTALL_NEEDED+=("$display_name")
+                fi
+            else
+                print_warning "$display_name requires manual installation"
+                MANUAL_INSTALL_NEEDED+=("$display_name")
+            fi
             continue
         fi
         
@@ -632,6 +687,14 @@ show_manual_install_instructions() {
     
     for component in "${MANUAL_INSTALL_NEEDED[@]}"; do
         case $component in
+            "Neovim")
+                echo "📦 Neovim:"
+                echo "  # Download latest from GitHub releases:"
+                echo "  curl -fLo /tmp/nvim.tar.gz https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz"
+                echo "  sudo tar -C /opt -xzf /tmp/nvim.tar.gz && sudo mv /opt/nvim-linux-x86_64 /opt/nvim"
+                echo "  sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim"
+                echo ""
+                ;;
             "Starship")
                 echo "📦 Starship:"
                 echo "  curl -sS https://starship.rs/install.sh | sh"
