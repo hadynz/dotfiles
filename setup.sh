@@ -510,37 +510,76 @@ setup_fish_shell() {
     
     if [ "$current_shell" = "fish" ]; then
         print_info "Fish is already your default shell"
-        return
-    fi
-    
-    if [ "$NON_INTERACTIVE" = true ]; then
+    elif [ "$NON_INTERACTIVE" = true ]; then
         echo ""
         print_info "Non-interactive mode: Skipping default shell change"
-        return
+    else
+        echo ""
+        echo "Fish is installed but not your default shell."
+        read -p "Would you like to set Fish as your default shell? [y/N] " -n 1 -r
+        echo
+        
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            if [ "$DRY_RUN" = true ]; then
+                print_warning "[DRY RUN] Would set fish as default shell"
+            else
+                # Add fish to /etc/shells if not already there
+                if ! grep -q "$fish_path" /etc/shells; then
+                    print_step "Adding fish to /etc/shells (requires sudo)"
+                    echo "$fish_path" | sudo tee -a /etc/shells > /dev/null
+                fi
+                
+                # Change default shell
+                print_step "Changing default shell to fish"
+                chsh -s "$fish_path"
+                print_info "Default shell changed to fish! Restart your terminal to apply."
+            fi
+        fi
     fi
     
-    echo ""
-    echo "Fish is installed but not your default shell."
-    read -p "Would you like to set Fish as your default shell? [y/N] " -n 1 -r
-    echo
-    
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        if [ "$DRY_RUN" = true ]; then
-            print_warning "[DRY RUN] Would set fish as default shell"
-            return
-        fi
+    # On Linux, ensure fish launches from bash for environments that ignore
+    # the login shell (e.g. lxc-attach, some Docker/container setups).
+    if [ "$(detect_os)" = "linux" ]; then
+        local bashrc="$HOME/.bashrc"
+        local fish_exec_marker="# >>> dotfiles fish launcher >>>"
         
-        # Add fish to /etc/shells if not already there
-        if ! grep -q "$fish_path" /etc/shells; then
-            print_step "Adding fish to /etc/shells (requires sudo)"
-            echo "$fish_path" | sudo tee -a /etc/shells > /dev/null
+        if [ -f "$bashrc" ] && grep -q "$fish_exec_marker" "$bashrc"; then
+            print_info "Fish launcher already configured in .bashrc"
+        else
+            if [ "$DRY_RUN" = true ]; then
+                print_warning "[DRY RUN] Would add fish launcher to .bashrc"
+            elif [ "$NON_INTERACTIVE" = true ]; then
+                print_step "Adding fish launcher to .bashrc"
+                add_fish_bashrc_launcher "$bashrc" "$fish_exec_marker"
+            else
+                echo ""
+                echo "Some environments (e.g. lxc-attach, Docker) ignore the login shell."
+                read -p "Add a fish launcher to .bashrc for these cases? [Y/n] " -n 1 -r
+                echo
+                if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+                    add_fish_bashrc_launcher "$bashrc" "$fish_exec_marker"
+                fi
+            fi
         fi
-        
-        # Change default shell
-        print_step "Changing default shell to fish"
-        chsh -s "$fish_path"
-        print_info "Default shell changed to fish! Restart your terminal to apply."
     fi
+}
+
+add_fish_bashrc_launcher() {
+    local bashrc="$1"
+    local marker="$2"
+    
+    cat >> "$bashrc" << 'FISH_LAUNCHER'
+
+# >>> dotfiles fish launcher >>>
+# Launch fish for interactive sessions in environments that ignore the login shell
+# (e.g. lxc-attach, Docker). Remove this block if you prefer bash as your interactive shell.
+if [ -t 1 ] && command -v fish >/dev/null 2>&1; then
+    exec fish
+fi
+# <<< dotfiles fish launcher <<<
+FISH_LAUNCHER
+    
+    print_info "Fish launcher added to .bashrc"
 }
 
 # ============================================================================
