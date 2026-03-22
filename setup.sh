@@ -369,10 +369,7 @@ check_and_install_components() {
         # Check if package requires manual installation
         if [ "$package_name" = "MANUAL" ]; then
             # Attempt auto-install for known components
-            if command -v "$binary" &> /dev/null; then
-                local version=$($binary --version 2>/dev/null | head -n1 || echo "installed")
-                print_info "$display_name already installed: $version"
-            elif [ "$DRY_RUN" = true ]; then
+            if [ "$DRY_RUN" = true ]; then
                 print_warning "[DRY RUN] Would install $display_name via custom installer"
             elif type "install_${binary}_manual" &>/dev/null; then
                 print_step "Installing $display_name via custom installer..."
