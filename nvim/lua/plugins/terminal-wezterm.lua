@@ -1,21 +1,21 @@
 return {
   {
     "mrjones2014/smart-splits.nvim",
-    lazy = false,
-    opts = function()
-      -- Determine the appropriate multiplexer backend.
-      -- If neither tmux nor wezterm is available, disable mux integration
-      -- to prevent errors in environments without a terminal multiplexer.
-      local mux_config = {}
-      if vim.fn.executable("tmux") == 0 and vim.fn.executable("wezterm") == 0 then
-        mux_config.default_mux = "ignore"
-      end
-
-      return vim.tbl_deep_extend("force", mux_config, {
+    -- Must lazy-load to prevent startup error when no multiplexer (tmux/wezterm) is installed.
+    -- The plugin's own plugin/smart-splits.lua runs mux detection on source, before config() runs.
+    -- With keys defined below, it loads on first <C-h/j/k/l> press instead.
+    lazy = true,
+    config = function()
+      local opts = {
         at_edge = function(ctx)
           require("utils.hopscotch").spatial(ctx.direction)
         end,
-      })
+      }
+      if vim.fn.executable("tmux") == 0 and vim.fn.executable("wezterm") == 0 then
+        opts.default_mux = "ignore"
+      end
+
+      require("smart-splits").setup(opts)
     end,
     keys = {
       { "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", mode = { "n", "v" }, desc = "Go to left window" },
