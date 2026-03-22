@@ -391,9 +391,22 @@ link_configs() {
                 else
                     # Check if config already exists
                     if [ -e "$target" ] && [ ! -L "$target" ]; then
-                        print_warning "$target exists and is not a symlink"
-                        print_warning "Please backup and remove it, then re-run this script"
-                        continue
+                        local backup_path="${target}.backup.$(date +%Y%m%d%H%M%S)"
+                        if [ "$NON_INTERACTIVE" = true ]; then
+                            print_step "Backing up existing $config_dir to ${backup_path##*/}"
+                            mv "$target" "$backup_path"
+                        else
+                            print_warning "$target exists and is not a symlink"
+                            read -p "  Back it up and replace with dotfiles link? [Y/n] " -n 1 -r
+                            echo
+                            if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+                                print_step "Backing up to ${backup_path##*/}"
+                                mv "$target" "$backup_path"
+                            else
+                                print_warning "Skipping $display_name config linking"
+                                continue
+                            fi
+                        fi
                     fi
                     
                     # Remove existing symlink if it exists
