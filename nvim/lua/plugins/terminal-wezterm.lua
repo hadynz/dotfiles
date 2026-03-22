@@ -2,11 +2,21 @@ return {
   {
     "mrjones2014/smart-splits.nvim",
     lazy = false,
-    opts = {
-      at_edge = function(ctx)
-        require("utils.hopscotch").spatial(ctx.direction)
-      end,
-    },
+    opts = function()
+      -- Determine the appropriate multiplexer backend.
+      -- If neither tmux nor wezterm is available, disable mux integration
+      -- to prevent errors in environments without a terminal multiplexer.
+      local mux_config = {}
+      if vim.fn.executable("tmux") == 0 and vim.fn.executable("wezterm") == 0 then
+        mux_config.default_mux = "ignore"
+      end
+
+      return vim.tbl_deep_extend("force", mux_config, {
+        at_edge = function(ctx)
+          require("utils.hopscotch").spatial(ctx.direction)
+        end,
+      })
+    end,
     keys = {
       { "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", mode = { "n", "v" }, desc = "Go to left window" },
       { "<C-j>", "<cmd>lua require'smart-splits'.move_cursor_down()<cr>", mode = { "n", "v" }, desc = "Go to lower window" },
