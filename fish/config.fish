@@ -1,6 +1,23 @@
 # Load dependency management functions
 source ~/.config/fish/helpers/dependency_management.fish
 
+# Load custom functions (not managed by Fisher)
+for func_file in ~/.config/fish/custom-functions/*.fish
+    source $func_file
+end
+
+# Bootstrap Fisher plugin manager if not installed
+if not functions -q fisher
+    if status is-interactive
+        echo "🐟 Fisher not found. Installing..."
+        curl -sL https://git.io/fisher | source
+        if functions -q fisher
+            echo "📦 Installing plugins from fish_plugins..."
+            fisher update
+        end
+    end
+end
+
 # Convenience alias for quick dependency check
 alias deps="check_and_install_dependencies"
 
