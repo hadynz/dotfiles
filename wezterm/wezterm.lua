@@ -45,6 +45,9 @@ local config = {
 	-- Avoid font adjustments when window manager tiling kicks in
 	adjust_window_size_when_changing_font_size = false,
 
+	-- Enable kitty keyboard protocol so apps can distinguish modified keys (e.g. Shift+Enter)
+	enable_kitty_keyboard = true,
+
 	-- Disable default key bindings
 	-- disable_default_key_bindings = true,
 
@@ -142,10 +145,10 @@ local config = {
 			end),
 		},
 
-		-- Copy Mode
+		-- Copy Mode (use Leader instead of CTRL to avoid hijacking Escape / Ctrl+[)
 		{
 			key = "[",
-			mods = "CTRL",
+			mods = "LEADER",
 			action = wezterm.action.ActivateCopyMode,
 		},
 
@@ -191,6 +194,7 @@ local config = {
 			mods = "CTRL",
 			action = wezterm.action.CloseCurrentPane({ confirm = true }),
 		},
+
 	},
 
 	mouse_bindings = {
