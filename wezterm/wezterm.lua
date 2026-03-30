@@ -195,6 +195,13 @@ local config = {
 			action = wezterm.action.CloseCurrentPane({ confirm = true }),
 		},
 
+		-- Shift+Enter: send CSI u sequence so TUI apps (e.g. rovo/crossterm) distinguish it from Enter
+		{
+			key = "Enter",
+			mods = "SHIFT",
+			action = wezterm.action.SendString("\x1b[13;2u"),
+		},
+
 	},
 
 	mouse_bindings = {
