@@ -1,11 +1,11 @@
 return {
   {
     "mrjones2014/smart-splits.nvim",
-    -- Must lazy-load to prevent startup error when no multiplexer (tmux/wezterm) is installed.
-    -- The plugin's own plugin/smart-splits.lua runs mux detection on source, before config() runs.
-    -- With keys defined below, it loads on first <C-h/j/k/l> press instead.
-    lazy = true,
-    config = function()
+    -- Load eagerly so <C-hjkl> work in all buffers (including codediff's nowait buffers
+    -- which shadow the lazy-key handler). The startup error from mux detection is avoided
+    -- by setting default_mux = "ignore" when no multiplexer is available.
+    lazy = false,
+    opts = function()
       local opts = {
         at_edge = function(ctx)
           require("utils.hopscotch").spatial(ctx.direction)
@@ -14,8 +14,7 @@ return {
       if vim.fn.executable("tmux") == 0 and vim.fn.executable("wezterm") == 0 then
         opts.default_mux = "ignore"
       end
-
-      require("smart-splits").setup(opts)
+      return opts
     end,
     keys = {
       { "<C-h>", "<cmd>lua require'smart-splits'.move_cursor_left()<cr>", mode = { "n", "v" }, desc = "Go to left window" },
@@ -77,20 +76,23 @@ return {
         callback = function() _last_win = vim.api.nvim_get_current_win() end,
         desc = "Track last window for floating terminal refocus",
       })
-      vim.api.nvim_create_autocmd("WinEnter", {
-        callback = function()
-          if _last_win and vim.api.nvim_win_is_valid(_last_win) then
-            local last_config = vim.api.nvim_win_get_config(_last_win)
-            if last_config.relative ~= "" then return end
-          end
-          focus_floating_terminal()
-        end,
-        desc = "Refocus floating terminal on window enter",
-      })
-      vim.api.nvim_create_autocmd("FocusGained", {
-        callback = function() focus_floating_terminal() end,
-        desc = "Refocus floating terminal when Neovim regains focus",
-      })
+      -- NOTE: Commented out — this autocmd interferes with window navigation inside
+      -- codediff (and potentially other multi-pane layouts) by stealing focus back
+      -- to any open floating terminal whenever you switch windows.
+      -- vim.api.nvim_create_autocmd("WinEnter", {
+      --   callback = function()
+      --     if _last_win and vim.api.nvim_win_is_valid(_last_win) then
+      --       local last_config = vim.api.nvim_win_get_config(_last_win)
+      --       if last_config.relative ~= "" then return end
+      --     end
+      --     focus_floating_terminal()
+      --   end,
+      --   desc = "Refocus floating terminal on window enter",
+      -- })
+      -- vim.api.nvim_create_autocmd("FocusGained", {
+      --   callback = function() focus_floating_terminal() end,
+      --   desc = "Refocus floating terminal when Neovim regains focus",
+      -- })
     end,
   },
 }

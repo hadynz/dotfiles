@@ -13,7 +13,7 @@ local config = {
 	}),
 	line_height = 1.10,
 	use_cap_height_to_scale_fallback_fonts = true,
-  tab_max_width = 50,
+	tab_max_width = 50,
 
 	macos_window_background_blur = 40,
 	window_background_opacity = 1,
@@ -195,13 +195,24 @@ local config = {
 			action = wezterm.action.CloseCurrentPane({ confirm = true }),
 		},
 
+		-- Move tabs
+		{
+			key = "LeftArrow",
+			mods = "CMD|CTRL",
+			action = wezterm.action.MoveTabRelative(-1),
+		},
+		{
+			key = "RightArrow",
+			mods = "CMD|CTRL",
+			action = wezterm.action.MoveTabRelative(1),
+		},
+
 		-- Shift+Enter: send CSI u sequence so TUI apps (e.g. rovo/crossterm) distinguish it from Enter
 		{
 			key = "Enter",
 			mods = "SHIFT",
 			action = wezterm.action.SendString("\x1b[13;2u"),
 		},
-
 	},
 
 	mouse_bindings = {
