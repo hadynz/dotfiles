@@ -92,24 +92,34 @@ local config = {
 		{
 			key = "`",
 			mods = "CTRL",
-			action = wezterm.action_callback(function(_, pane)
+			action = wezterm.action_callback(function(window, pane)
 				local tab = pane:tab()
 				local panes = tab:panes_with_info()
 
-				-- If there is only one pane, split it
+				-- Find the active pane entry
+				local active_pane_info = nil
+				for _, p in ipairs(panes) do
+					if p.is_active then
+						active_pane_info = p
+						break
+					end
+				end
+
 				if #panes == 1 then
-					pane:split({
-						direction = "Right",
-						size = 0.4,
-					})
-				-- If the first pane is not zoomed, zoom it (i.e. hide other panes)
-				elseif not panes[1].is_zoomed then
-					panes[1].pane:activate()
-					tab:set_zoomed(true)
-				-- If the first pane is zoomed (i.e. hiding other panes), unzoom it
-				elseif panes[1].is_zoomed then
+					-- Only one pane: split to create a terminal alongside
+					pane:split({ direction = "Right", size = 0.4 })
+				elseif active_pane_info and active_pane_info.is_zoomed then
+					-- Currently zoomed (focus mode on): unzoom to restore all panes
 					tab:set_zoomed(false)
-					panes[2].pane:activate()
+					window:set_right_status("")
+				else
+					-- Multiple panes, not zoomed: zoom the active pane (focus mode)
+					tab:set_zoomed(true)
+					window:set_right_status(wezterm.format({
+						{ Attribute = { Intensity = "Bold" } },
+						{ Foreground = { AnsiColor = "Yellow" } },
+						{ Text = "  FOCUS " },
+					}))
 				end
 			end),
 		},
