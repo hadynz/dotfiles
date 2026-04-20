@@ -29,6 +29,7 @@ map("n", "ycc", "yygccp", { remap = true })
 -- Window navigation
 map("n", "<leader>w\\", "<C-w>v", { desc = "Split vertical" })
 map("n", "<leader>w-", "<C-w>s", { desc = "Split horizontal" })
+map("n", "<leader>wb", function() require("utils.window").close_into_buffer() end, { desc = "Close window, keep as buffer" })
 
 -- LazyVim distro keymaps
 require("which-key").add({
