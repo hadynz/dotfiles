@@ -9,11 +9,12 @@ return {
       { "<leader>gd", "<cmd>CodeDiff<cr>", desc = "Branch Diff (against HEAD)" },
       { "<leader>dd", "<cmd>CodeDiff<cr>", desc = "Branch Diff (against HEAD)" },
 
-      { "<leader>gD", "<cmd>CodeDiff main...<cr>", desc = "Branch Diff (against main)" },
-      { "<leader>dm", "<cmd>CodeDiff main...<cr>", desc = "Branch Diff (against main)" },
+      { "<leader>gD", "<cmd>CodeDiff origin/main...<cr>", desc = "Branch Diff (against main)" },
+      { "<leader>dm", "<cmd>CodeDiff origin/main...<cr>", desc = "Branch Diff (against main)" },
 
       { "<leader>gh", "<cmd>CodeDiff history %<cr>", desc = "File History Diff" },
       { "<leader>df", "<cmd>CodeDiff history %<cr>", desc = "File History Diff" },
+      { "<leader>dF", "<cmd>CodeDiff history --base main%<cr>", desc = "File History Diff (against main)" },
       {
         "<leader>da",
         function()

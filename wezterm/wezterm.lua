@@ -55,12 +55,12 @@ local config = {
 		-- Forward CMD to CTRL (for VIM usage)
 		{
 			key = "[",
-			mods = "CMD",
+			mods = "SUPER",
 			action = wezterm.action.SendKey({ key = "[", mods = "CTRL" }),
 		},
 		{
 			key = "]",
-			mods = "CMD",
+			mods = "SUPER",
 			action = wezterm.action.SendKey({ key = "]", mods = "CTRL" }),
 		},
 		{
@@ -243,6 +243,68 @@ for i = 1, 8 do
 		action = wezterm.action.ActivateTab(i - 1),
 	})
 end
+
+-- Update focus indicator reactively (fires on tab switch, zoom, etc.)
+wezterm.on("update-right-status", function(window, pane)
+	local tab = pane:tab()
+	local panes = tab:panes_with_info()
+	local is_zoomed = false
+	for _, p in ipairs(panes) do
+		if p.is_zoomed then
+			is_zoomed = true
+			break
+		end
+	end
+	if is_zoomed then
+		window:set_right_status(wezterm.format({
+			{ Attribute = { Intensity = "Bold" } },
+			{ Foreground = { AnsiColor = "Yellow" } },
+			{ Text = "  FOCUS " },
+		}))
+	else
+		window:set_right_status("")
+	end
+end)
+
+-- Custom tab title: keycap shortcut badge + tab title with generous padding
+wezterm.on("format-tab-title", function(tab, _, _, _, hover, _)
+	local index = tab.tab_index + 1
+
+	-- Use the custom title if set, otherwise the active pane's title
+	local title = tab.tab_title
+	if not title or title == "" then
+		title = tab.active_pane.title
+	end
+	-- Trim to a reasonable length
+	if #title > 28 then
+		title = title:sub(1, 27) .. "…"
+	end
+
+	local is_active = tab.is_active
+
+	-- Colour palette (Catppuccin Frappé)
+	local bg_active   = "#51576d" -- surface1
+	local bg_inactive = "#303446" -- base
+	local bg_hover    = "#414559" -- surface0
+	local fg_active   = "#c6d0f5" -- text
+	local fg_inactive = "#838ba7" -- overlay1
+	local keycap_fg   = "#e5c890" -- yellow
+	local keycap_dim  = "#a07d40" -- dimmed yellow for inactive
+
+	local bg = is_active and bg_active or (hover and bg_hover or bg_inactive)
+	local fg = is_active and fg_active or fg_inactive
+	local nfg = is_active and keycap_fg or keycap_dim
+
+	return {
+		{ Background = { Color = bg } },
+		{ Foreground = { Color = nfg } },
+		{ Attribute = { Intensity = "Bold" } },
+		{ Text = "  " .. tostring(index) },
+		{ Attribute = { Intensity = "Normal" } },
+		{ Foreground = { Color = fg } },
+		{ Text = "  " .. title .. "  " },
+	}
+end)
 
 weztermSmartSplitsConfig.apply_to_config(config)
 
