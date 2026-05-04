@@ -10,21 +10,6 @@ return {
   {
     "afonsofrancof/worktrees.nvim",
     event = "VeryLazy",
-    init = function()
-      vim.api.nvim_create_autocmd("VimEnter", {
-        callback = function()
-          -- Check if this is a git repo with worktrees
-          local result = vim.fn.systemlist("git worktree list 2>/dev/null")
-          if #result > 1 then
-            -- Defer to allow VeryLazy plugins to load first
-            vim.defer_fn(function()
-              require("worktrees").switch()
-            end, 100)
-          end
-        end,
-        desc = "Show worktree picker on startup if worktrees exist",
-      })
-    end,
     config = function(_, opts)
       require("worktrees").setup(opts)
 
