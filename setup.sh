@@ -33,6 +33,7 @@ declare -a COMPONENTS=(
     "Neovim:neovim:MANUAL:nvim:nvim:0"
     "Tmux:tmux:tmux:tmux:tmux:0"
     "Lazygit:jesseduffield/lazygit/lazygit:lazygit:lazygit:lazygit:0"
+    "Worktrunk:worktrunk:N/A:wt:worktrunk:0"
     "Starship:starship:MANUAL:starship:starship:0"
     "Wezterm:wezterm:MANUAL:wezterm:wezterm:1"
     "VSCode:visual-studio-code:MANUAL:code:vscode:1"
@@ -765,7 +766,7 @@ unlink_all() {
         exit 0
     fi
     
-    local packages=("fish" "nvim" "tmux" "wezterm" "starship" "lazygit")
+    local packages=("fish" "nvim" "tmux" "wezterm" "starship" "lazygit" "worktrunk")
     
     for pkg in "${packages[@]}"; do
         local target="$HOME/.config/$pkg"
