@@ -1,4 +1,13 @@
 onboarding = false
+
+[keys]
+open_notification_target = ""
+open_worktree = "prefix+o"
+remove_worktree = "prefix+d"
+new_tab = ""
+switch_tab = ""
+focus_agent = "prefix+1..9"
+
 [ui.toast]
 delivery = "system"
 
