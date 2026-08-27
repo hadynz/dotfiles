@@ -1,0 +1,2 @@
+[aliases]
+create = "git fetch origin && wt switch --create {{ args }} --base origin/main"
