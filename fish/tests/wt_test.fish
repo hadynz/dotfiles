@@ -165,6 +165,20 @@ set call_status $status
 _wt_test_assert_status 1 $call_status 'reserved Worktrunk shortcut output should fail'
 _wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'reserved shortcut output should not call Worktrunk'
 
+command rm -f "$WT_TEST_ATLAS_LOG" "$WT_TEST_NATIVE_LOG"
+set -l ref_test_repo "$wt_test_tmp/ref-validation"
+command git init --quiet --initial-branch=main "$ref_test_repo"
+command git -C "$ref_test_repo" -c user.name=Test -c user.email=test@example.com commit --quiet --allow-empty -m initial
+command git -C "$ref_test_repo" switch --quiet --create previous
+command git -C "$ref_test_repo" switch --quiet main
+set -g WT_TEST_ATLAS_OUTPUT '@{-1}'
+pushd "$ref_test_repo" >/dev/null
+wt switch "$bitbucket_url" >/dev/null 2>/dev/null
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 1 $call_status 'checkout-history syntax from resolver should fail'
+_wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'checkout-history syntax should not call Worktrunk'
+
 command rm -f "$WT_TEST_BINARY_LOG" "$WT_TEST_NATIVE_LOG"
 functions --erase __worktrunk_native
 wt list

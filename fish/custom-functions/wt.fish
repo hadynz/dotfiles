@@ -58,6 +58,7 @@ function wt
         if test "$branch" = '@'
             or test "$branch" = '^'
             or not command git check-ref-format --branch "$branch" >/dev/null 2>&1
+            or not command git check-ref-format "refs/heads/$branch" >/dev/null 2>&1
             echo "wt: atlas prflow returned an unsafe branch name: $branch" >&2
             return 1
         end
