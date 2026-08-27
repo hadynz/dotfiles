@@ -13,7 +13,7 @@
 ## File map
 
 - Create `fish/tests/wt_test.fish`: isolated Fish assertions for Bitbucket dispatch and error paths.
-- Modify `fish/functions/wt.fish`: lazy-load native Worktrunk integration privately and dispatch Bitbucket PR URLs.
+- Create `fish/custom-functions/wt.fish`: lazy-load native Worktrunk integration privately and dispatch Bitbucket PR URLs.
 - Create `worktrunk/config.toml`: personal Worktrunk aliases, beginning with `create`.
 - Modify `setup.sh`: install/select/link/unlink the Worktrunk config directory through the existing component system.
 
@@ -21,7 +21,7 @@
 
 **Files:**
 - Create: `fish/tests/wt_test.fish`
-- Modify: `fish/functions/wt.fish`
+- Create: `fish/custom-functions/wt.fish`
 
 - [ ] **Step 1: Write the failing dispatcher tests**
 
@@ -94,7 +94,7 @@ function atlas
     return $WT_TEST_ATLAS_STATUS
 end
 
-source (status dirname)/../functions/wt.fish
+source (status dirname)/../custom-functions/wt.fish
 
 set -l bitbucket_url 'https://bitbucket.org/atlassian/canvas/pull-requests/123'
 set -g WT_TEST_ATLAS_OUTPUT 'feature/bitbucket-switch'
@@ -178,14 +178,14 @@ echo 'All wt Fish tests passed'
 Run:
 
 ```bash
-fish fish/tests/wt_test.fish
+fish --no-config fish/tests/wt_test.fish
 ```
 
 Expected: non-zero exit with at least the Bitbucket assertion failing because the existing wrapper forwards the URL directly to native Worktrunk and never calls `atlas prflow branch`.
 
 - [ ] **Step 3: Replace the bootstrap stub with the dispatcher**
 
-Replace `fish/functions/wt.fish` with:
+Create `fish/custom-functions/wt.fish` with:
 
 ```fish
 # Worktrunk shell integration for Fish with Bitbucket Cloud PR URL support.
@@ -203,8 +203,9 @@ function wt
         return 127
     end
 
-    # The generated integration reads this dynamically scoped variable.
-    set -l WORKTRUNK_BIN "$worktrunk_bin"
+    # The generated private function cannot see caller-local variables, so keep
+    # the resolved binary in the global override shared with completions.
+    set -g WORKTRUNK_BIN "$worktrunk_bin"
 
     # Let the binary emit completions directly and avoid recursing through the
     # wrapper when Worktrunk's completion script sets COMPLETE.
@@ -263,7 +264,7 @@ end
 Run:
 
 ```bash
-fish -n fish/functions/wt.fish fish/tests/wt_test.fish
+fish -n fish/custom-functions/wt.fish fish/tests/wt_test.fish
 ```
 
 Expected: exit 0 with no output.
@@ -273,7 +274,7 @@ Expected: exit 0 with no output.
 Run:
 
 ```bash
-fish fish/tests/wt_test.fish
+fish --no-config fish/tests/wt_test.fish
 ```
 
 Expected:
@@ -287,7 +288,7 @@ All wt Fish tests passed
 Run:
 
 ```bash
-fish --no-config -c 'source fish/functions/wt.fish; wt --version'
+fish --no-config -c 'source fish/custom-functions/wt.fish; wt --version'
 ```
 
 Expected: exit 0 and output beginning with `wt v`.
@@ -295,7 +296,7 @@ Expected: exit 0 and output beginning with `wt v`.
 - [ ] **Step 7: Commit the dispatcher**
 
 ```bash
-git add fish/functions/wt.fish fish/tests/wt_test.fish
+git add fish/custom-functions/wt.fish fish/tests/wt_test.fish
 git commit -m "feat: resolve Bitbucket PRs in wt switch"
 ```
 
@@ -449,7 +450,7 @@ Expected staged diff: one Worktrunk component entry and `worktrunk` added to the
 ### Task 4: End-to-end non-destructive verification
 
 **Files:**
-- Verify: `fish/functions/wt.fish`
+- Verify: `fish/custom-functions/wt.fish`
 - Verify: `fish/tests/wt_test.fish`
 - Verify: `worktrunk/config.toml`
 - Verify: `setup.sh`
@@ -459,8 +460,8 @@ Expected staged diff: one Worktrunk component entry and `worktrunk` added to the
 Run:
 
 ```bash
-fish -n fish/functions/wt.fish fish/tests/wt_test.fish
-fish fish/tests/wt_test.fish
+fish -n fish/custom-functions/wt.fish fish/tests/wt_test.fish
+fish --no-config fish/tests/wt_test.fish
 bash -n setup.sh
 git diff --check
 ```
@@ -474,7 +475,7 @@ Run:
 ```bash
 wt --config "$PWD/worktrunk/config.toml" config alias show create
 wt --config "$PWD/worktrunk/config.toml" config alias dry-run create -- verification-branch
-fish --no-config -c 'source fish/functions/wt.fish; wt --version'
+fish --no-config -c 'source fish/custom-functions/wt.fish; wt --version'
 ```
 
 Expected: the alias is shown, the dry run renders `verification-branch` without executing it, and Worktrunk prints its version.

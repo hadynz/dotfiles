@@ -23,7 +23,7 @@ Worktrunk aliases preserve the parent shell's directory change when they invoke 
 
 ## Fish dispatch
 
-Worktrunk resolves built-in commands before configured aliases, so an alias cannot override `switch`. The tracked `fish/functions/wt.fish` function will instead act as a narrow dispatcher.
+Worktrunk resolves built-in commands before configured aliases, so an alias cannot override `switch`. The tracked `fish/custom-functions/wt.fish` function will instead act as a narrow dispatcher. The existing generated `fish/functions/wt.fish` remains tool-owned and ignored by Git.
 
 On first use, the function will load Worktrunk's generated Fish shell integration under a private function name and point it at the real `wt` binary. This private function remains responsible for directive files, directory changes, exit statuses, and `--execute` behavior.
 
