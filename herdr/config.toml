@@ -1,0 +1,102 @@
+onboarding = false
+[ui.toast]
+delivery = "system"
+
+[ui]
+show_agent_labels_on_pane_borders = true
+
+agent_panel_sort = "priority"
+[theme]
+name = "catppuccin"
+auto_switch = false
+
+[[keys.command]]
+key = "prefix+t"
+type = "plugin_action"
+command = "herdr-navigator.open"
+description = "jump to anything"
+
+# ── Seamless navigation: nvim splits ↔ herdr panes ↔ wezterm panes ────
+# Uses our wrapper script that adds wezterm escape at herdr edges.
+# Must use absolute path (~ does not expand in herdr shell commands).
+[[keys.command]]
+key = "ctrl+h"
+type = "shell"
+command = "~/.config/herdr/scripts/herdr-wezterm-nav.sh left"
+description = "Navigate left (nvim/herdr/wezterm)"
+
+[[keys.command]]
+key = "ctrl+j"
+type = "shell"
+command = "~/.config/herdr/scripts/herdr-wezterm-nav.sh down"
+description = "Navigate down (nvim/herdr/wezterm)"
+
+[[keys.command]]
+key = "ctrl+k"
+type = "shell"
+command = "~/.config/herdr/scripts/herdr-wezterm-nav.sh up"
+description = "Navigate up (nvim/herdr/wezterm)"
+
+[[keys.command]]
+key = "ctrl+l"
+type = "shell"
+command = "~/.config/herdr/scripts/herdr-wezterm-nav.sh right"
+description = "Navigate right (nvim/herdr/wezterm)"
+
+# ── Resize: delegated to herdr-splits plugin actions ──────────────────
+[[keys.command]]
+key = "ctrl+left"
+type = "plugin_action"
+command = "herdr-splits.resize-left"
+description = "Resize left (nvim/herdr)"
+
+[[keys.command]]
+key = "ctrl+down"
+type = "plugin_action"
+command = "herdr-splits.resize-down"
+description = "Resize down (nvim/herdr)"
+
+[[keys.command]]
+key = "ctrl+up"
+type = "plugin_action"
+command = "herdr-splits.resize-up"
+description = "Resize up (nvim/herdr)"
+
+[[keys.command]]
+key = "ctrl+right"
+type = "plugin_action"
+command = "herdr-splits.resize-right"
+description = "Resize right (nvim/herdr)"
+
+# Hint plugin
+[[keys.command]]
+key = "prefix+f"
+type = "shell"
+command = "herdr plugin pane open --plugin maedana.hint --entrypoint jump"
+description = "hint jump"
+
+#[[keys.command]]
+#key = "prefix+space"
+#type = "plugin_action"
+#command = "herdr-whichkey.open"
+#description = "whichkey menu"
+
+# [[keys.command]]
+# key = "prefix+space"
+# type = "popup"                 # the only route with a real interactive TTY
+# command = "sh ~/.config/herdr/plugins/config/cowboyvang.which-key/launch.sh"
+# description = "which-key: show prefix bindings"
+# width = "78%"
+# height = "62%"
+
+[[keys.command]]
+description = "open pretty which"
+key = "prefix+space"
+type = "plugin_action"
+command = "ramarivera.pretty-which.open"
+
+[[keys.command]]
+key = "prefix+m"
+type = "plugin_action"
+command = "nicosuave.memex.palette"
+description = "memex session palette"
