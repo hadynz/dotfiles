@@ -1,3 +1,9 @@
+# Codex injects YARN_NO_PROXY into sandboxed commands, but Yarn 4 treats it as an
+# unsupported configuration key. Preserve standard proxy variables and remove only this one.
+if set -q CODEX_SANDBOX
+    set -e YARN_NO_PROXY
+end
+
 # Load dependency management functions
 source ~/.config/fish/helpers/dependency_management.fish
 
@@ -53,7 +59,7 @@ alias canvas="cd $HOME/atlassian/canvas"
 #alias oldvi="vi"
 alias c="clear"
 alias nap="/Users/hosman/go/bin/nap"
-alias rovo="acli rovodev tui --yolo --restore"
+# alias rovo="acli rovodev tui --yolo --restore"
 
 if test -x /opt/homebrew/bin/fnm
     alias fnm="/opt/homebrew/bin/fnm"
@@ -72,7 +78,9 @@ end
 
 # Git Aliases
 alias gl="git pull"
-alias glorigin="glbranch main"
+alias glorigin="glbranch main --merge"
+alias glmorigin="glbranch main --merge" # Duplicate of glorigin. Adds new convention for rebase and merge
+alias glrorigin="glbranch main --rebase"
 alias gp="git push --no-verify -f"
 alias gcm="git commit --message"
 alias gcammend="git commit --amend --no-edit"
