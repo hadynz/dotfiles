@@ -39,12 +39,13 @@ end
 
 set -gx WT_TEST_GENERATED_INTEGRATION "$wt_test_tmp/generated-wt.fish"
 printf '%s\n' \
-    'function wt' \
+    'function __worktrunk_native' \
     '    printf "%s\n" $argv > "$WT_TEST_NATIVE_LOG"' \
     '    return $WT_TEST_NATIVE_STATUS' \
     'end' > "$WT_TEST_GENERATED_INTEGRATION"
 printf '%s\n' \
     '#!/bin/sh' \
+    'printf "%s\n" "$@" > "$WT_TEST_BINARY_LOG"' \
     'if [ "$1" = "config" ]; then' \
     '    /bin/cat "$WT_TEST_GENERATED_INTEGRATION"' \
     'fi' \
@@ -54,6 +55,7 @@ set -gx PATH "$wt_test_tmp" $PATH
 
 set -g WT_TEST_NATIVE_LOG "$wt_test_tmp/native.log"
 set -g WT_TEST_ATLAS_LOG "$wt_test_tmp/atlas.log"
+set -gx WT_TEST_BINARY_LOG "$wt_test_tmp/binary.log"
 set -g WT_TEST_NATIVE_STATUS 0
 set -g WT_TEST_ATLAS_STATUS 0
 set -g WT_TEST_ATLAS_OUTPUT
@@ -78,6 +80,15 @@ set -l call_status $status
 _wt_test_assert_status 0 $call_status 'Bitbucket switch should succeed'
 _wt_test_assert_log "prflow|branch|$bitbucket_url" "$WT_TEST_ATLAS_LOG" 'Bitbucket URL should be passed to atlas prflow'
 _wt_test_assert_log 'switch|feature/bitbucket-switch|--no-hooks' "$WT_TEST_NATIVE_LOG" 'resolved branch and trailing flags should reach Worktrunk'
+
+command rm -f "$WT_TEST_ATLAS_LOG" "$WT_TEST_NATIVE_LOG"
+set -l mixed_case_url 'HTTPS://Bitbucket.org/atlassian/canvas/pull-requests/124'
+set -g WT_TEST_ATLAS_OUTPUT 'feature/mixed-case-url'
+wt switch "$mixed_case_url"
+set call_status $status
+_wt_test_assert_status 0 $call_status 'mixed-case Bitbucket URL should succeed'
+_wt_test_assert_log "prflow|branch|$mixed_case_url" "$WT_TEST_ATLAS_LOG" 'mixed-case Bitbucket URL should be passed to atlas prflow'
+_wt_test_assert_log 'switch|feature/mixed-case-url' "$WT_TEST_NATIVE_LOG" 'mixed-case URL should resolve before Worktrunk'
 
 command rm -f "$WT_TEST_ATLAS_LOG" "$WT_TEST_NATIVE_LOG"
 wt switch feature/local
@@ -132,12 +143,36 @@ _wt_test_assert_status 1 $call_status 'multi-line resolver output should fail'
 _wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'multi-line resolver output should not call Worktrunk'
 
 command rm -f "$WT_TEST_ATLAS_LOG" "$WT_TEST_NATIVE_LOG"
+set -g WT_TEST_ATLAS_OUTPUT '--execute=touch-pwned'
+wt switch "$bitbucket_url" >/dev/null 2>/dev/null
+set call_status $status
+_wt_test_assert_status 1 $call_status 'option-like resolver output should fail'
+_wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'option-like resolver output should not call Worktrunk'
+
+command rm -f "$WT_TEST_ATLAS_LOG" "$WT_TEST_NATIVE_LOG"
+set -g WT_TEST_ATLAS_OUTPUT '@'
+wt switch "$bitbucket_url" >/dev/null 2>/dev/null
+set call_status $status
+_wt_test_assert_status 1 $call_status 'reserved Worktrunk shortcut output should fail'
+_wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'reserved shortcut output should not call Worktrunk'
+
+command rm -f "$WT_TEST_BINARY_LOG" "$WT_TEST_NATIVE_LOG"
+functions --erase __worktrunk_native
+wt list
+set call_status $status
+_wt_test_assert_status 0 $call_status 'lazy native initialization should succeed'
+_wt_test_assert_log 'config|shell|init|fish|--cmd=__worktrunk_native' "$WT_TEST_BINARY_LOG" 'first native call should initialize Worktrunk'
+_wt_test_assert_log 'list' "$WT_TEST_NATIVE_LOG" 'initialized native function should receive arguments'
+
+command rm -f "$WT_TEST_ATLAS_LOG" "$WT_TEST_NATIVE_LOG" "$WT_TEST_BINARY_LOG"
 functions --erase atlas
+functions --erase __worktrunk_native
 set -gx PATH "$wt_test_tmp"
 wt switch "$bitbucket_url" >/dev/null 2>/dev/null
 set call_status $status
 _wt_test_assert_status 127 $call_status 'missing atlas should fail with command-not-found status'
 _wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'missing atlas should not call Worktrunk'
+_wt_test_assert_log '' "$WT_TEST_BINARY_LOG" 'missing atlas should not initialize Worktrunk'
 set -gx PATH "$wt_test_tmp" $wt_test_original_path
 
 if test $wt_test_failures -gt 0

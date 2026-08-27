@@ -25,7 +25,7 @@ Worktrunk aliases preserve the parent shell's directory change when they invoke 
 
 Worktrunk resolves built-in commands before configured aliases, so an alias cannot override `switch`. The tracked `fish/custom-functions/wt.fish` function will instead act as a narrow dispatcher. The existing generated `fish/functions/wt.fish` remains tool-owned and ignored by Git.
 
-On first use, the function will load Worktrunk's generated Fish shell integration under a private function name and point it at the real `wt` binary. This private function remains responsible for directive files, directory changes, exit statuses, and `--execute` behavior.
+After any Bitbucket URL has been resolved and validated, the function will load Worktrunk's generated Fish shell integration under a private function name and point it at the real `wt` binary. This private function remains responsible for directive files, directory changes, exit statuses, and `--execute` behavior.
 
 The public `wt` function will inspect only the common form `wt switch <target>`:
 
@@ -45,6 +45,7 @@ The wrapper will return a non-zero status and avoid calling Worktrunk when:
 - `atlas` is unavailable.
 - `atlas prflow branch` fails.
 - The resolver returns no branch or more than one non-empty output line.
+- The resolver output is not a valid, non-option Git branch name or is a reserved Worktrunk shortcut.
 
 Native Worktrunk errors and statuses pass through unchanged. A failed `git fetch origin` aborts `wt create`; it must not silently create from a stale base.
 
@@ -55,7 +56,7 @@ Automated checks will avoid creating or removing real worktrees:
 - Validate Fish syntax for the wrapper.
 - Validate `worktrunk/config.toml` with the installed Worktrunk binary.
 - Use `wt config alias dry-run create -- <sample-branch>` to confirm the rendered create command.
-- Exercise the Fish dispatcher with stubbed `atlas` and native Worktrunk functions, covering Bitbucket URL resolution, argument forwarding, ordinary branch switching, picker invocation, resolver failure, missing/empty output, and multi-line output.
+- Exercise the Fish dispatcher with stubbed `atlas` and native Worktrunk functions, covering Bitbucket URL resolution, argument forwarding, ordinary branch switching, picker invocation, resolver failure, missing/empty output, multi-line output, unsafe branch output, and lazy Worktrunk initialization.
 - Run the setup script in dry-run mode to confirm Worktrunk participates in normal component installation and linking.
 
 Manual verification may then use a known Bitbucket PR URL to confirm that the shell enters the selected worktree. No removal command will run as part of verification.

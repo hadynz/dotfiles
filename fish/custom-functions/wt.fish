@@ -24,17 +24,10 @@ function wt
         return
     end
 
-    if not functions -q __worktrunk_native
-        command "$worktrunk_bin" config shell init fish --cmd=__worktrunk_native | source
-        set -l init_status $pipestatus[1]
-        set -l source_status $pipestatus[2]
-        test $init_status -eq 0; or return $init_status
-        test $source_status -eq 0; or return $source_status
-    end
-
+    set -l native_args $argv
     if test (count $argv) -ge 2
         and test "$argv[1]" = switch
-        and string match --quiet --regex '^https?://bitbucket\.org/[^/]+/[^/]+/pull-requests/[0-9]+([/?#].*)?$' -- "$argv[2]"
+        and string match --ignore-case --quiet --regex '^https?://bitbucket\.org/[^/]+/[^/]+/pull-requests/[0-9]+([/?#].*)?$' -- "$argv[2]"
 
         if not type -q atlas
             echo 'wt: atlas is required to resolve Bitbucket pull request URLs' >&2
@@ -61,9 +54,23 @@ function wt
             return 1
         end
 
-        __worktrunk_native switch "$branches[1]" $argv[3..-1]
-        return $status
+        set -l branch "$branches[1]"
+        if test "$branch" = '@'
+            or test "$branch" = '^'
+            or not command git check-ref-format --branch "$branch" >/dev/null 2>&1
+            echo "wt: atlas prflow returned an unsafe branch name: $branch" >&2
+            return 1
+        end
+
+        set native_args switch "$branch" $argv[3..-1]
     end
 
-    __worktrunk_native $argv
+    if not functions -q __worktrunk_native
+        command "$worktrunk_bin" config shell init fish --cmd=__worktrunk_native | source
+        set -l pipeline_status $pipestatus
+        test $pipeline_status[1] -eq 0; or return $pipeline_status[1]
+        test $pipeline_status[2] -eq 0; or return $pipeline_status[2]
+    end
+
+    __worktrunk_native $native_args
 end

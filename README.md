@@ -49,8 +49,17 @@ The script will:
 - **Wezterm** - GPU-accelerated terminal emulator
 - **Starship** - Cross-shell prompt
 - **Lazygit** - Simple terminal UI for git
+- **Worktrunk** - Git worktree management with Fish and Bitbucket PR switching
 - **VSCode** - Visual Studio Code editor
 - **Cursor** - AI-first code editor
+
+### Worktrunk
+
+Selecting Worktrunk links the tracked configuration to `~/.config/worktrunk/`.
+
+- `wt create <branch>` fetches `origin`, creates the worktree from `origin/main`, and enters it.
+- `wt switch <Bitbucket PR URL>` resolves the PR source branch with `atlas prflow branch` before switching.
+- `wt switch` keeps Worktrunk's native picker, including `Alt-x` to remove the selected worktree.
 
 ## 🎮 Usage
 
@@ -155,4 +164,3 @@ stow -t ~/.config/Code/User vscode
 
 - [omerxx/dotfiles](https://github.com/omerxx/dotfiles) - Inspiration
 - [GNU Stow Manual](https://www.gnu.org/software/stow/manual/stow.html)
-
