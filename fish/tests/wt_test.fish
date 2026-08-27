@@ -39,7 +39,11 @@ end
 
 set -gx WT_TEST_GENERATED_INTEGRATION "$wt_test_tmp/generated-wt.fish"
 printf '%s\n' \
-    'function __worktrunk_native' \
+    'function wt' \
+    '    if test "$argv[1]" = --source' \
+    '        cargo run --bin wt --quiet -- $argv[2..-1]' \
+    '        return $status' \
+    '    end' \
     '    printf "%s\n" $argv > "$WT_TEST_NATIVE_LOG"' \
     '    return $WT_TEST_NATIVE_STATUS' \
     'end' > "$WT_TEST_GENERATED_INTEGRATION"
@@ -55,6 +59,7 @@ set -gx PATH "$wt_test_tmp" $PATH
 
 set -g WT_TEST_NATIVE_LOG "$wt_test_tmp/native.log"
 set -g WT_TEST_ATLAS_LOG "$wt_test_tmp/atlas.log"
+set -g WT_TEST_CARGO_LOG "$wt_test_tmp/cargo.log"
 set -gx WT_TEST_BINARY_LOG "$wt_test_tmp/binary.log"
 set -g WT_TEST_NATIVE_STATUS 0
 set -g WT_TEST_ATLAS_STATUS 0
@@ -69,6 +74,10 @@ function atlas
     printf '%s\n' $argv > "$WT_TEST_ATLAS_LOG"
     printf '%s\n' $WT_TEST_ATLAS_OUTPUT
     return $WT_TEST_ATLAS_STATUS
+end
+
+function cargo
+    printf '%s\n' $argv > "$WT_TEST_CARGO_LOG"
 end
 
 source (status dirname)/../custom-functions/wt.fish
@@ -161,8 +170,14 @@ functions --erase __worktrunk_native
 wt list
 set call_status $status
 _wt_test_assert_status 0 $call_status 'lazy native initialization should succeed'
-_wt_test_assert_log 'config|shell|init|fish|--cmd=__worktrunk_native' "$WT_TEST_BINARY_LOG" 'first native call should initialize Worktrunk'
+_wt_test_assert_log 'config|shell|init|fish' "$WT_TEST_BINARY_LOG" 'first native call should initialize Worktrunk under its default command name'
 _wt_test_assert_log 'list' "$WT_TEST_NATIVE_LOG" 'initialized native function should receive arguments'
+
+command rm -f "$WT_TEST_CARGO_LOG"
+wt --source list
+set call_status $status
+_wt_test_assert_status 0 $call_status 'native source mode should succeed'
+_wt_test_assert_log 'run|--bin|wt|--quiet|--|list' "$WT_TEST_CARGO_LOG" 'source mode should retain the Worktrunk Cargo binary name'
 
 command rm -f "$WT_TEST_ATLAS_LOG" "$WT_TEST_NATIVE_LOG" "$WT_TEST_BINARY_LOG"
 functions --erase atlas

@@ -66,10 +66,23 @@ function wt
     end
 
     if not functions -q __worktrunk_native
-        command "$worktrunk_bin" config shell init fish --cmd=__worktrunk_native | source
-        set -l pipeline_status $pipestatus
-        test $pipeline_status[1] -eq 0; or return $pipeline_status[1]
-        test $pipeline_status[2] -eq 0; or return $pipeline_status[2]
+        set -l integration (command "$worktrunk_bin" config shell init fish)
+        set -l init_status $status
+        test $init_status -eq 0; or return $init_status
+
+        # Rename only the generated Fish function. Asking Worktrunk to generate
+        # a different command name also changes `cargo run --bin wt`, which
+        # breaks its developer-only --source mode.
+        set -l private_integration (string replace --regex '^function wt$' 'function __worktrunk_native' -- $integration)
+        set -l rename_status $status
+        if test $rename_status -ne 0
+            echo 'wt: could not find the generated Worktrunk Fish function' >&2
+            return 1
+        end
+
+        printf '%s\n' $private_integration | source
+        set -l source_status $pipestatus[2]
+        test $source_status -eq 0; or return $source_status
     end
 
     __worktrunk_native $native_args
