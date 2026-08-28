@@ -7,11 +7,33 @@
 function __wt_match_local_worktree --argument-names target
     set -l branches $argv[2..-1]
     set -l matches
+    set -l target_pattern (string escape --style=regex -- "$target")
+    set -l target_lower (string lower -- "$target")
+    set -l exact_matches
 
     for branch in $branches
-        if string match --quiet -- "*$target*" "$branch"
+        if test (string lower -- "$branch") = "$target_lower"
+            set -a exact_matches "$branch"
+        end
+    end
+
+    if test (count $exact_matches) -eq 1
+        printf '%s\n' "$exact_matches[1]"
+        return 0
+    end
+    if test (count $exact_matches) -gt 1
+        printf '%s\n' $exact_matches | env LC_ALL=C sort -f
+        return 2
+    end
+
+    for branch in $branches
+        if string match --ignore-case --quiet --regex -- "$target_pattern" "$branch"
             set -a matches "$branch"
         end
+    end
+
+    if test (count $matches) -gt 1
+        set matches (printf '%s\n' $matches | env LC_ALL=C sort -f)
     end
 
     if test (count $matches) -eq 1

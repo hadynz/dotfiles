@@ -87,6 +87,36 @@ set -l match_status $status
 _wt_test_assert_status 0 $match_status 'unique local-worktree substring should resolve'
 _wt_test_assert_equal 'feature/CNS-123-smart-switch' "$match_output" 'unique substring should return the canonical branch'
 
+set match_output (__wt_match_local_worktree cns-123 feature/CNS-123-smart-switch feature/unrelated)
+set match_status $status
+_wt_test_assert_status 0 $match_status 'local-worktree matching should be case-insensitive'
+_wt_test_assert_equal 'feature/CNS-123-smart-switch' "$match_output" 'case-insensitive matching should preserve canonical casing'
+
+set match_output (__wt_match_local_worktree 'a+b' feature/aaab feature/literal-a+b)
+set match_status $status
+_wt_test_assert_status 0 $match_status 'worktree target metacharacters should be literal'
+_wt_test_assert_equal 'feature/literal-a+b' "$match_output" 'literal matching should not treat plus as a regex operator'
+
+set match_output (__wt_match_local_worktree 'a*' feature/abcd feature/unrelated)
+set match_status $status
+_wt_test_assert_status 1 $match_status 'worktree target glob characters should be literal'
+_wt_test_assert_equal '' "$match_output" 'literal glob characters should not create false matches'
+
+set match_output (__wt_match_local_worktree feature/foo feature/foo feature/foo-experiment)
+set match_status $status
+_wt_test_assert_status 0 $match_status 'an exact worktree name should beat partial matches'
+_wt_test_assert_equal 'feature/foo' "$match_output" 'exact precedence should return only the exact branch'
+
+set match_output (__wt_match_local_worktree FOO feature/Foo feature/foo)
+set match_status $status
+_wt_test_assert_status 2 $match_status 'multiple case-insensitive exact names should be ambiguous'
+_wt_test_assert_equal 'feature/Foo|feature/foo' (string join '|' $match_output) 'ambiguous exact names should be sorted'
+
+set match_output (__wt_match_local_worktree smart z-smart a-smart m-smart)
+set match_status $status
+_wt_test_assert_status 2 $match_status 'multiple partial worktree matches should be ambiguous'
+_wt_test_assert_equal 'a-smart|m-smart|z-smart' (string join '|' $match_output) 'ambiguous partial names should be sorted'
+
 set -l bitbucket_url 'https://bitbucket.org/atlassian/canvas/pull-requests/123'
 set -g WT_TEST_ATLAS_OUTPUT 'feature/bitbucket-switch'
 wt switch "$bitbucket_url" --no-hooks
