@@ -93,7 +93,13 @@ end
 
 # Return success when trailing switch arguments require native target handling.
 function __wt_switch_bypasses_smart_match
+    set -l skip_next false
     for arg in $argv
+        if test "$skip_next" = true
+            set skip_next false
+            continue
+        end
+
         if test "$arg" = --
             break
         end
@@ -101,13 +107,27 @@ function __wt_switch_bypasses_smart_match
         switch "$arg"
             case --create
                 return 0
+            case --base --execute --format --config --config-set
+                set skip_next true
+                continue
+            case '--base=*' '--execute=*' '--format=*' '--config=*' '--config-set=*'
+                continue
             case '--*'
                 continue
             case '-*'
                 set -l short_options (string sub --start 2 -- "$arg")
-                if string match --quiet '*c*' -- "$short_options"
-                    or string match --quiet '*C*' -- "$short_options"
-                    return 0
+                set -l option_index 0
+                for short_option in (string split '' -- "$short_options")
+                    set option_index (math $option_index + 1)
+                    switch "$short_option"
+                        case c C
+                            return 0
+                        case b x
+                            if test $option_index -eq (string length -- "$short_options")
+                                set skip_next true
+                            end
+                            break
+                    end
                 end
         end
     end

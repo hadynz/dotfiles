@@ -233,6 +233,16 @@ popd >/dev/null
 _wt_test_assert_status 0 $call_status 'clustered repository context should remain native'
 _wt_test_assert_log "switch|cns-456|-vC$wt_test_tmp" "$WT_TEST_NATIVE_LOG" 'clustered repository context should not use the current repository for smart resolution'
 
+for attached_value_option in -xcode -vxcode -bcurrent
+    command rm -f "$WT_TEST_NATIVE_LOG"
+    pushd "$smart_repo" >/dev/null
+    wt switch cns-456 "$attached_value_option"
+    set call_status $status
+    popd >/dev/null
+    _wt_test_assert_status 0 $call_status "attached option value $attached_value_option should allow smart resolution"
+    _wt_test_assert_log "switch|feature/CNS-456-smart-search|$attached_value_option" "$WT_TEST_NATIVE_LOG" "characters in the $attached_value_option value should not be treated as flags"
+end
+
 command rm -f "$WT_TEST_NATIVE_LOG"
 pushd "$smart_repo" >/dev/null
 wt switch "$detached_worktree"
