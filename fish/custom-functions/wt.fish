@@ -20,6 +20,31 @@ function __wt_local_worktree_branches
     end
 end
 
+# Return success when the target resolves to a registered local worktree path.
+function __wt_is_local_worktree_path --argument-names target
+    set -l target_path "$target"
+    if test "$target" = '~'
+        set target_path "$HOME"
+    else if string match --quiet --regex '^~/' -- "$target"
+        set target_path (string replace --regex '^~' "$HOME" -- "$target")
+    end
+    set -l resolved_target (path resolve -- "$target_path")
+
+    set -l porcelain (command git worktree list --porcelain 2>/dev/null)
+    test $status -eq 0; or return 1
+
+    for line in $porcelain
+        if string match --quiet --regex '^worktree ' -- "$line"
+            set -l worktree_path (string replace 'worktree ' '' -- "$line")
+            if test "$resolved_target" = (path resolve -- "$worktree_path")
+                return 0
+            end
+        end
+    end
+
+    return 1
+end
+
 # Print matching canonical branch names.
 # Status 0: one match; 1: no match; 2: ambiguous.
 function __wt_match_local_worktree --argument-names target
@@ -64,6 +89,22 @@ function __wt_match_local_worktree --argument-names target
 
     printf '%s\n' $matches
     return 2
+end
+
+# Return success when trailing switch arguments require native target handling.
+function __wt_switch_bypasses_smart_match
+    for arg in $argv
+        if test "$arg" = --
+            break
+        end
+
+        switch "$arg"
+            case -c --create '-C*'
+                return 0
+        end
+    end
+
+    return 1
 end
 
 function wt
@@ -134,10 +175,12 @@ function wt
         and not string match --quiet -- '-*' "$argv[2]"
         and not contains -- "$argv[2]" '@' '^'
         and not string match --ignore-case --quiet --regex '^https?://' -- "$argv[2]"
+        and not __wt_switch_bypasses_smart_match $argv[3..-1]
 
         set -l worktree_branches (__wt_local_worktree_branches)
         set -l discovery_status $status
         if test $discovery_status -eq 0
+            and not __wt_is_local_worktree_path "$argv[2]"
             set -l worktree_matches (__wt_match_local_worktree "$argv[2]" $worktree_branches)
             set -l match_status $status
             if test $match_status -eq 0

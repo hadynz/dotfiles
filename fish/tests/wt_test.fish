@@ -129,7 +129,11 @@ for branch in feature/CNS-123-smart-switch feature/CNS-456-smart-search feature/
 end
 
 command git -C "$smart_repo" branch feature/CNS-999-no-worktree
-command git -C "$smart_repo" worktree add --quiet --detach "$wt_test_tmp/detached-worktree" HEAD
+set -l detached_worktree "$wt_test_tmp/detached-worktree"
+command git -C "$smart_repo" worktree add --quiet --detach "$detached_worktree" HEAD
+set -l path_collision_branch "feature$detached_worktree"
+command git -C "$smart_repo" branch "$path_collision_branch"
+command git -C "$smart_repo" worktree add --quiet "$wt_test_tmp/path-collision-branch" "$path_collision_branch"
 
 pushd "$smart_repo" >/dev/null
 set -l discovered (__wt_local_worktree_branches)
@@ -137,7 +141,8 @@ set -l discovery_status $status
 popd >/dev/null
 
 _wt_test_assert_status 0 $discovery_status 'local worktree discovery should succeed inside a repository'
-_wt_test_assert_equal 'feature/CNS-123-smart-switch|feature/CNS-123-smart-switch-followup|feature/CNS-456-smart-search|feature/literal-a+b|main' (string join '|' $discovered) 'discovery should return sorted checked-out branches only'
+set -l expected_discovered (printf '%s\n' feature/CNS-123-smart-switch feature/CNS-123-smart-switch-followup feature/CNS-456-smart-search feature/literal-a+b "$path_collision_branch" main | env LC_ALL=C sort -u)
+_wt_test_assert_equal (string join '|' $expected_discovered) (string join '|' $discovered) 'discovery should return sorted checked-out branches only'
 
 command rm -f "$WT_TEST_NATIVE_LOG"
 pushd "$smart_repo" >/dev/null
@@ -188,6 +193,59 @@ popd >/dev/null
 _wt_test_assert_status 0 $call_status 'option-like switch forms should remain native'
 _wt_test_assert_log 'switch|--create|feature/new' "$WT_TEST_NATIVE_LOG" 'option-like targets should bypass smart resolution'
 
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt switch cns-456 --create
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'trailing create should remain native for a unique fuzzy collision'
+_wt_test_assert_log 'switch|cns-456|--create' "$WT_TEST_NATIVE_LOG" 'trailing create should not rewrite a unique target'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt switch smart --create
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'trailing create should remain native for an ambiguous fuzzy collision'
+_wt_test_assert_log 'switch|smart|--create' "$WT_TEST_NATIVE_LOG" 'trailing create should not reject an ambiguous target'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt switch cns-456 -C "$wt_test_tmp"
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'trailing repository context should remain native'
+_wt_test_assert_log "switch|cns-456|-C|$wt_test_tmp" "$WT_TEST_NATIVE_LOG" 'trailing repository context should not use the current repository for smart resolution'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt switch "$detached_worktree"
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'registered worktree paths should remain native'
+_wt_test_assert_log "switch|$detached_worktree" "$WT_TEST_NATIVE_LOG" 'a path colliding with a branch substring should not be rewritten'
+
+for shortcut in '@' '^' '-' 'pr:17' 'mr:18'
+    command rm -f "$WT_TEST_NATIVE_LOG"
+    pushd "$smart_repo" >/dev/null
+    wt switch "$shortcut"
+    set call_status $status
+    popd >/dev/null
+    _wt_test_assert_status 0 $call_status "native shortcut $shortcut should succeed"
+    _wt_test_assert_log "switch|$shortcut" "$WT_TEST_NATIVE_LOG" "native shortcut $shortcut should pass through unchanged"
+end
+
+command rm -f "$WT_TEST_BINARY_LOG" "$WT_TEST_NATIVE_LOG"
+set -gx COMPLETE fish
+pushd "$smart_repo" >/dev/null
+wt switch cns-456
+set call_status $status
+popd >/dev/null
+set -e COMPLETE
+_wt_test_assert_status 0 $call_status 'completion mode should succeed'
+_wt_test_assert_log 'switch|cns-456' "$WT_TEST_BINARY_LOG" 'completion mode should bypass smart resolution and call the binary directly'
+_wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'completion mode should not call the generated native function'
+
 set -l bitbucket_url 'https://bitbucket.org/atlassian/canvas/pull-requests/123'
 set -g WT_TEST_ATLAS_OUTPUT 'feature/bitbucket-switch'
 wt switch "$bitbucket_url" --no-hooks
@@ -206,11 +264,13 @@ _wt_test_assert_log "prflow|branch|$mixed_case_url" "$WT_TEST_ATLAS_LOG" 'mixed-
 _wt_test_assert_log 'switch|feature/mixed-case-url' "$WT_TEST_NATIVE_LOG" 'mixed-case URL should resolve before Worktrunk'
 
 command rm -f "$WT_TEST_ATLAS_LOG" "$WT_TEST_NATIVE_LOG"
-wt switch feature/local
+pushd "$smart_repo" >/dev/null
+wt switch guaranteed-unmatched-target
 set call_status $status
+popd >/dev/null
 _wt_test_assert_status 0 $call_status 'ordinary branch switch should succeed'
 _wt_test_assert_log '' "$WT_TEST_ATLAS_LOG" 'ordinary branch switch should not call atlas'
-_wt_test_assert_log 'switch|feature/local' "$WT_TEST_NATIVE_LOG" 'ordinary branch switch should pass through unchanged'
+_wt_test_assert_log 'switch|guaranteed-unmatched-target' "$WT_TEST_NATIVE_LOG" 'ordinary branch switch should pass through unchanged'
 
 command rm -f "$WT_TEST_ATLAS_LOG" "$WT_TEST_NATIVE_LOG"
 set -l github_url 'https://github.com/example/project/pull/456'
