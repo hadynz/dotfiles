@@ -2,6 +2,24 @@
 # Native shell integration is loaded as __worktrunk_native so this public
 # function can resolve Bitbucket PRs before delegating to Worktrunk.
 
+# Print canonical branches checked out by local worktrees.
+function __wt_local_worktree_branches
+    set -l porcelain (command git worktree list --porcelain 2>/dev/null)
+    set -l git_status $status
+    test $git_status -eq 0; or return $git_status
+
+    set -l branches
+    for line in $porcelain
+        if string match --quiet --regex '^branch refs/heads/' -- "$line"
+            set -a branches (string replace 'branch refs/heads/' '' -- "$line")
+        end
+    end
+
+    if test (count $branches) -gt 0
+        printf '%s\n' $branches | env LC_ALL=C sort -u
+    end
+end
+
 # Print matching canonical branch names.
 # Status 0: one match; 1: no match; 2: ambiguous.
 function __wt_match_local_worktree --argument-names target

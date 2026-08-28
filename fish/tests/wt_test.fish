@@ -117,6 +117,27 @@ set match_status $status
 _wt_test_assert_status 2 $match_status 'multiple partial worktree matches should be ambiguous'
 _wt_test_assert_equal 'a-smart|m-smart|z-smart' (string join '|' $match_output) 'ambiguous partial names should be sorted'
 
+set -l smart_repo "$wt_test_tmp/smart-switch-repo"
+command git init --quiet --initial-branch=main "$smart_repo"
+command git -C "$smart_repo" -c user.name=Test -c user.email=test@example.com commit --quiet --allow-empty -m initial
+
+for branch in feature/CNS-123-smart-switch feature/CNS-456-smart-search feature/CNS-123-smart-switch-followup feature/literal-a+b
+    command git -C "$smart_repo" branch "$branch"
+    set -l worktree_name (string replace --all / - "$branch")
+    command git -C "$smart_repo" worktree add --quiet "$wt_test_tmp/$worktree_name" "$branch"
+end
+
+command git -C "$smart_repo" branch feature/CNS-999-no-worktree
+command git -C "$smart_repo" worktree add --quiet --detach "$wt_test_tmp/detached-worktree" HEAD
+
+pushd "$smart_repo" >/dev/null
+set -l discovered (__wt_local_worktree_branches)
+set -l discovery_status $status
+popd >/dev/null
+
+_wt_test_assert_status 0 $discovery_status 'local worktree discovery should succeed inside a repository'
+_wt_test_assert_equal 'feature/CNS-123-smart-switch|feature/CNS-123-smart-switch-followup|feature/CNS-456-smart-search|feature/literal-a+b|main' (string join '|' $discovered) 'discovery should return sorted checked-out branches only'
+
 set -l bitbucket_url 'https://bitbucket.org/atlassian/canvas/pull-requests/123'
 set -g WT_TEST_ATLAS_OUTPUT 'feature/bitbucket-switch'
 wt switch "$bitbucket_url" --no-hooks
