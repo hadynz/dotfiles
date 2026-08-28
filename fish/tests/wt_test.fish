@@ -82,6 +82,11 @@ end
 
 source (status dirname)/../custom-functions/wt.fish
 
+set -l match_output (__wt_match_local_worktree smart feature/CNS-123-smart-switch feature/unrelated)
+set -l match_status $status
+_wt_test_assert_status 0 $match_status 'unique local-worktree substring should resolve'
+_wt_test_assert_equal 'feature/CNS-123-smart-switch' "$match_output" 'unique substring should return the canonical branch'
+
 set -l bitbucket_url 'https://bitbucket.org/atlassian/canvas/pull-requests/123'
 set -g WT_TEST_ATLAS_OUTPUT 'feature/bitbucket-switch'
 wt switch "$bitbucket_url" --no-hooks

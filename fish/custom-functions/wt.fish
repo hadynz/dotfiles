@@ -2,6 +2,30 @@
 # Native shell integration is loaded as __worktrunk_native so this public
 # function can resolve Bitbucket PRs before delegating to Worktrunk.
 
+# Print matching canonical branch names.
+# Status 0: one match; 1: no match; 2: ambiguous.
+function __wt_match_local_worktree --argument-names target
+    set -l branches $argv[2..-1]
+    set -l matches
+
+    for branch in $branches
+        if string match --quiet -- "*$target*" "$branch"
+            set -a matches "$branch"
+        end
+    end
+
+    if test (count $matches) -eq 1
+        printf '%s\n' "$matches[1]"
+        return 0
+    end
+    if test (count $matches) -eq 0
+        return 1
+    end
+
+    printf '%s\n' $matches
+    return 2
+end
+
 function wt
     set -l worktrunk_bin "$WORKTRUNK_BIN"
     if test -z "$worktrunk_bin"
