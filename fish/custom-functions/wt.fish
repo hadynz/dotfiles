@@ -99,8 +99,16 @@ function __wt_switch_bypasses_smart_match
         end
 
         switch "$arg"
-            case -c --create '-C*'
+            case --create
                 return 0
+            case '--*'
+                continue
+            case '-*'
+                set -l short_options (string sub --start 2 -- "$arg")
+                if string match --quiet '*c*' -- "$short_options"
+                    or string match --quiet '*C*' -- "$short_options"
+                    return 0
+                end
         end
     end
 

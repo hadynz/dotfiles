@@ -219,6 +219,22 @@ _wt_test_assert_log "switch|cns-456|-C|$wt_test_tmp" "$WT_TEST_NATIVE_LOG" 'trai
 
 command rm -f "$WT_TEST_NATIVE_LOG"
 pushd "$smart_repo" >/dev/null
+wt switch cns-456 -cv
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'clustered create options should remain native'
+_wt_test_assert_log 'switch|cns-456|-cv' "$WT_TEST_NATIVE_LOG" 'clustered create options should not rewrite the target'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt switch cns-456 "-vC$wt_test_tmp"
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'clustered repository context should remain native'
+_wt_test_assert_log "switch|cns-456|-vC$wt_test_tmp" "$WT_TEST_NATIVE_LOG" 'clustered repository context should not use the current repository for smart resolution'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
 wt switch "$detached_worktree"
 set call_status $status
 popd >/dev/null
