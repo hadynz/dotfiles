@@ -178,7 +178,7 @@ if test (count $exact_matches) -eq 1
     return 0
 end
 if test (count $exact_matches) -gt 1
-    printf '%s\n' (string sort --ignore-case -- $exact_matches)
+    printf '%s\n' $exact_matches | env LC_ALL=C sort -f
     return 2
 end
 ```
@@ -193,7 +193,7 @@ Add:
 set match_output (__wt_match_local_worktree FOO feature/Foo feature/foo)
 set match_status $status
 _wt_test_assert_status 2 $match_status 'multiple case-insensitive exact names should be ambiguous'
-_wt_test_assert_equal (string join '|' (string sort --ignore-case -- feature/Foo feature/foo)) (string join '|' $match_output) 'ambiguous exact names should be sorted'
+_wt_test_assert_equal 'feature/Foo|feature/foo' (string join '|' $match_output) 'ambiguous exact names should be sorted'
 
 set match_output (__wt_match_local_worktree smart z-smart a-smart m-smart)
 set match_status $status
@@ -206,7 +206,7 @@ Run the tests. Expected: the exact ambiguity assertion passes, while partial out
 Before printing ambiguous partial matches, sort them:
 
 ```fish
-set matches (string sort --ignore-case -- $matches)
+set matches (printf '%s\n' $matches | env LC_ALL=C sort -f)
 ```
 
 Run the tests and expect exit 0.
@@ -280,7 +280,7 @@ function __wt_local_worktree_branches
     end
 
     if test (count $branches) -gt 0
-        printf '%s\n' $branches | string sort --unique
+        printf '%s\n' $branches | env LC_ALL=C sort -u
     end
 end
 ```
