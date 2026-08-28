@@ -61,6 +61,7 @@ set -g WT_TEST_NATIVE_LOG "$wt_test_tmp/native.log"
 set -g WT_TEST_ATLAS_LOG "$wt_test_tmp/atlas.log"
 set -g WT_TEST_CARGO_LOG "$wt_test_tmp/cargo.log"
 set -gx WT_TEST_BINARY_LOG "$wt_test_tmp/binary.log"
+set -g WT_TEST_ERROR_LOG "$wt_test_tmp/error.log"
 set -g WT_TEST_NATIVE_STATUS 0
 set -g WT_TEST_ATLAS_STATUS 0
 set -g WT_TEST_ATLAS_OUTPUT
@@ -138,10 +139,59 @@ popd >/dev/null
 _wt_test_assert_status 0 $discovery_status 'local worktree discovery should succeed inside a repository'
 _wt_test_assert_equal 'feature/CNS-123-smart-switch|feature/CNS-123-smart-switch-followup|feature/CNS-456-smart-search|feature/literal-a+b|main' (string join '|' $discovered) 'discovery should return sorted checked-out branches only'
 
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt switch cns-456 --no-hooks
+set -l call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'unique smart worktree switch should succeed'
+_wt_test_assert_log 'switch|feature/CNS-456-smart-search|--no-hooks' "$WT_TEST_NATIVE_LOG" 'smart switch should pass the canonical branch and trailing arguments'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt switch feature/CNS-123-smart-switch
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'exact worktree switch should succeed'
+_wt_test_assert_log 'switch|feature/CNS-123-smart-switch' "$WT_TEST_NATIVE_LOG" 'exact branch should beat its containing followup branch'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt switch CNS-999
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'a branch without a worktree should use native pass-through'
+_wt_test_assert_log 'switch|CNS-999' "$WT_TEST_NATIVE_LOG" 'branches without worktrees should not be smart-resolved'
+
+command rm -f "$WT_TEST_NATIVE_LOG" "$WT_TEST_ERROR_LOG"
+pushd "$smart_repo" >/dev/null
+wt switch smart 2>"$WT_TEST_ERROR_LOG"
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 1 $call_status 'ambiguous smart switch should fail'
+_wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'ambiguous smart switch should not call Worktrunk'
+_wt_test_assert_log "wt: 'smart' matches multiple local worktrees:|  feature/CNS-123-smart-switch|  feature/CNS-123-smart-switch-followup|  feature/CNS-456-smart-search|wt: retry with a more specific name" "$WT_TEST_ERROR_LOG" 'ambiguous smart switch should list sorted candidates and guidance'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$wt_test_tmp" >/dev/null
+wt switch unknown-target
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'discovery failure should preserve native behavior'
+_wt_test_assert_log 'switch|unknown-target' "$WT_TEST_NATIVE_LOG" 'discovery failure should pass the original target through'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt switch --create feature/new
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'option-like switch forms should remain native'
+_wt_test_assert_log 'switch|--create|feature/new' "$WT_TEST_NATIVE_LOG" 'option-like targets should bypass smart resolution'
+
 set -l bitbucket_url 'https://bitbucket.org/atlassian/canvas/pull-requests/123'
 set -g WT_TEST_ATLAS_OUTPUT 'feature/bitbucket-switch'
 wt switch "$bitbucket_url" --no-hooks
-set -l call_status $status
+set call_status $status
 _wt_test_assert_status 0 $call_status 'Bitbucket switch should succeed'
 _wt_test_assert_log "prflow|branch|$bitbucket_url" "$WT_TEST_ATLAS_LOG" 'Bitbucket URL should be passed to atlas prflow'
 _wt_test_assert_log 'switch|feature/bitbucket-switch|--no-hooks' "$WT_TEST_NATIVE_LOG" 'resolved branch and trailing flags should reach Worktrunk'

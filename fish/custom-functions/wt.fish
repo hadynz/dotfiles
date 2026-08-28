@@ -128,6 +128,27 @@ function wt
         end
 
         set native_args switch "$branch" $argv[3..-1]
+    else if test (count $argv) -ge 2
+        and test "$argv[1]" = switch
+        and test -n "$argv[2]"
+        and not string match --quiet -- '-*' "$argv[2]"
+        and not contains -- "$argv[2]" '@' '^'
+        and not string match --ignore-case --quiet --regex '^https?://' -- "$argv[2]"
+
+        set -l worktree_branches (__wt_local_worktree_branches)
+        set -l discovery_status $status
+        if test $discovery_status -eq 0
+            set -l worktree_matches (__wt_match_local_worktree "$argv[2]" $worktree_branches)
+            set -l match_status $status
+            if test $match_status -eq 0
+                set native_args switch "$worktree_matches[1]" $argv[3..-1]
+            else if test $match_status -eq 2
+                echo "wt: '$argv[2]' matches multiple local worktrees:" >&2
+                printf '  %s\n' $worktree_matches >&2
+                echo 'wt: retry with a more specific name' >&2
+                return 1
+            end
+        end
     end
 
     if not functions -q __worktrunk_native
