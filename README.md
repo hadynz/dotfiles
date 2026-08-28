@@ -59,6 +59,8 @@ Selecting Worktrunk links the tracked configuration to `~/.config/worktrunk/`.
 
 - `wt create <branch>` fetches `origin`, creates the worktree from `origin/main`, and enters it.
 - `wt switch <Bitbucket PR URL>` resolves the PR source branch with `atlas prflow branch` before switching.
+- `wt switch <name>` resolves a unique, case-insensitive substring of an existing local worktree's branch name.
+- Exact worktree branch names take precedence. Ambiguous substrings list their matches and ask for a more specific name; unmatched targets retain native Worktrunk behavior.
 - `wt switch` keeps Worktrunk's native picker, including `Alt-x` to remove the selected worktree.
 
 ## 🎮 Usage
