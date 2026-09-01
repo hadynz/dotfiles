@@ -188,6 +188,66 @@ set parser_status $status
 _wt_test_assert_status 1 $parser_status 'unknown remove option should be rejected'
 _wt_test_assert_equal '' "$parser_output" 'unknown remove option should produce no parser output'
 
+set parser_output (__wt_single_remove_target_index smart --help)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'help after a remove target should bypass smart classification'
+_wt_test_assert_equal '' "$parser_output" 'help after a remove target should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index -h smart)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'short help before a remove target should bypass smart classification'
+_wt_test_assert_equal '' "$parser_output" 'short help before a remove target should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index -vh smart)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'clustered short help before a remove target should bypass smart classification'
+_wt_test_assert_equal '' "$parser_output" 'clustered short help before a remove target should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index -- -h)
+set parser_status $status
+_wt_test_assert_status 0 $parser_status 'double dash should preserve short help-looking target'
+_wt_test_assert_equal '2' "$parser_output" 'double dash should return short help-looking target index'
+
+set parser_output (__wt_single_remove_target_index --format)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'format option without a value should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'format option without a value should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index --config)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'config option without a value should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'config option without a value should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index --config-set)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'config-set option without a value should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'config-set option without a value should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index --format --force smart)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'format option followed by another option should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'format option followed by another option should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index --config -- smart)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'config option followed by double dash should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'config option followed by double dash should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index --config-set -- smart)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'config-set option followed by double dash should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'config-set option followed by double dash should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index "")
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'empty remove target should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'empty remove target should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index -- "")
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'empty remove target after double dash should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'empty remove target after double dash should produce no parser output'
+
 set -l smart_repo "$wt_test_tmp/smart-switch-repo"
 command git init --quiet --initial-branch=main "$smart_repo"
 command git -C "$smart_repo" -c user.name=Test -c user.email=test@example.com commit --quiet --allow-empty -m initial

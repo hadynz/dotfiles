@@ -147,8 +147,15 @@ function __wt_single_remove_target_index
         set argument_index (math $argument_index + 1)
 
         if test "$skip_next" = true
+            if test -z "$arg"; or string match --quiet -- '-*' "$arg"
+                return 1
+            end
             set skip_next false
             continue
+        end
+
+        if test -z "$arg"
+            return 1
         end
 
         if test "$positional_only" = true
@@ -165,7 +172,9 @@ function __wt_single_remove_target_index
             case --format --config --config-set
                 set skip_next true
             case '--format=*' '--config=*' '--config-set=*'
-            case --no-delete-branch --force-delete --foreground --reap --force --help --no-hooks --verbose --yes
+            case --help
+                return 1
+            case --no-delete-branch --force-delete --foreground --reap --force --no-hooks --verbose --yes
             case '--*'
                 return 1
             case '-*'
@@ -176,7 +185,9 @@ function __wt_single_remove_target_index
 
                 for short_option in (string split '' -- "$short_options")
                     switch "$short_option"
-                        case D f h v y
+                        case D f v y
+                        case h
+                            return 1
                         case C '*'
                             return 1
                     end
