@@ -62,6 +62,8 @@ Selecting Worktrunk links the tracked configuration to `~/.config/worktrunk/`.
 - `wt switch <name>` resolves a unique, case-insensitive substring of an existing local worktree's branch name.
 - Exact worktree branch names take precedence. Ambiguous substrings list their matches and ask for a more specific name; unmatched targets retain native Worktrunk behavior.
 - `wt switch` keeps Worktrunk's native picker, including `Alt-x` to remove the selected worktree.
+- `wt delete` is an alias for native `wt remove`.
+- `wt remove <name>` and `wt delete <name>` resolve a unique, case-insensitive substring of one existing local worktree's branch name. Exact names take precedence; ambiguous names list their matches, while unmatched or multi-target calls retain native removal behavior.
 
 ## 🎮 Usage
 
