@@ -1,4 +1,5 @@
 .DS_Store
+.worktrees/
 tmux/plugins/
 raycast
 fzf
@@ -9,4 +10,3 @@ fish/conf.d/*
 fish/functions/*
 fish/vendor/*
 fish/fish_variables
-
