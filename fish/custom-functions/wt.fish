@@ -226,45 +226,6 @@ function __wt_single_remove_target_index
     printf '%s\n' "$target_indexes[1]"
 end
 
-function __wt_complete_command_position
-    set -l command_tokens (commandline --current-process --tokenize --cut-at-cursor)
-    test (count $command_tokens) -eq 1
-end
-
-function __wt_complete_delete_condition
-    set -l command_tokens (commandline --current-process --tokenize --cut-at-cursor)
-    if test (count $command_tokens) -lt 2
-        return 1
-    end
-    if test "$command_tokens[1]" != wt
-        return 1
-    end
-    if test "$command_tokens[2]" != delete
-        return 1
-    end
-end
-
-function __wt_complete_delete
-    __wt_complete_delete_condition; or return 1
-
-    set -l command_tokens (commandline --current-process --tokenize --cut-at-cursor)
-
-    set command_tokens[2] remove
-    set -l current_token (commandline --current-token)
-    set -l worktrunk_bin "$WORKTRUNK_BIN"
-    if test -z "$worktrunk_bin"
-        set worktrunk_bin (type -P wt 2>/dev/null)
-    end
-    if test -z "$worktrunk_bin"
-        return 1
-    end
-
-    env COMPLETE=fish "$worktrunk_bin" -- $command_tokens "$current_token"
-end
-
-complete --keep-order --command wt --condition __wt_complete_command_position --arguments delete --description 'Alias for remove'
-complete --keep-order --command wt --condition '__wt_complete_delete_condition' --arguments '(__wt_complete_delete)'
-
 function wt
     set -l worktrunk_bin "$WORKTRUNK_BIN"
     if test -z "$worktrunk_bin"

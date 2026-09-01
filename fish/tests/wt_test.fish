@@ -7,6 +7,7 @@ set -e WORKTRUNK_BIN
 
 function _wt_test_cleanup --on-event fish_exit
     set -gx PATH $wt_test_original_path
+    set -gx fish_complete_path $WT_TEST_ORIGINAL_COMPLETE_PATH
     command rm -rf -- "$wt_test_tmp"
 end
 
@@ -51,9 +52,15 @@ printf '%s\n' \
     '#!/bin/sh' \
     'printf "%s\n" "$@" > "$WT_TEST_BINARY_LOG"' \
     'if [ "$COMPLETE" = "fish" ]; then' \
-    '    if [ "$3" = "remove" ]; then' \
-    '        printf "%s\n" "$*" >> "$WT_TEST_COMPLETION_LOG"' \
+    '    printf "%s\n" "$*" >> "$WT_TEST_COMPLETION_LOG"' \
+    '    if [ -z "$3" ]; then' \
+    '        printf "%s\t%s\n" switch "Switch worktree" remove "Remove worktree" list "List worktrees"' \
+    '    elif [ "$3" = "remove" ]; then' \
     '        printf "%s\n" --force --force-delete --foreground --format' \
+    '    elif [ "$3" = "switch" ]; then' \
+    '        printf "%s\n" --create --base' \
+    '    else' \
+    '        printf "%s\t%s\n" switch "Switch worktree" remove "Remove worktree" list "List worktrees"' \
     '    fi' \
     '    exit 0' \
     'fi' \
@@ -89,8 +96,10 @@ function cargo
     printf '%s\n' $argv > "$WT_TEST_CARGO_LOG"
 end
 
+set -l wt_test_completion_dir (path normalize (status dirname)/../custom-completions)
+set -gx WT_TEST_ORIGINAL_COMPLETE_PATH $fish_complete_path
+set -g fish_complete_path "$wt_test_completion_dir" $fish_complete_path
 complete --erase --command wt
-complete --keep-order --exclusive --command wt --arguments "(COMPLETE=fish $wt_test_tmp/wt -- (commandline --current-process --tokenize --cut-at-cursor) (commandline --current-token))"
 
 source (status dirname)/../custom-functions/wt.fish
 
@@ -111,18 +120,45 @@ _wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'delete completion mode should bypa
 
 set -l root_completions (complete -C 'wt ')
 set -l delete_completion (string match -- 'delete*' $root_completions)
+set -l delete_completion_count (count $delete_completion)
+_wt_test_assert_equal 1 $delete_completion_count 'root completion should expose exactly one delete alias'
 set -l delete_fields (string split \t -- "$delete_completion")
 _wt_test_assert_equal delete "$delete_fields[1]" 'root completion should expose delete'
 _wt_test_assert_equal 'Alias for remove' "$delete_fields[2]" 'root completion should describe delete as an alias for remove'
 
-set -l remove_completions (complete -C 'wt remove --f')
 command rm -f "$WT_TEST_COMPLETION_LOG"
 set -l delete_completions (complete -C 'wt delete --f')
 set -l delete_completion_calls (string split \n -- (string collect < "$WT_TEST_COMPLETION_LOG"))
-_wt_test_assert_equal (string join '|' -- $remove_completions) (string join '|' -- $delete_completions) 'delete completion should match native remove flags'
-_wt_test_assert_equal '--force|--force-delete|--foreground|--format' (string join '|' -- $delete_completions) 'delete completion should return native removal flags'
 _wt_test_assert_equal 1 (count $delete_completion_calls) 'delete completion should invoke the binary exactly once'
 _wt_test_assert_equal '-- wt remove --f' (string trim -- (string collect < "$WT_TEST_COMPLETION_LOG")) 'delete completion should rewrite the command before invoking the binary'
+
+command rm -f "$WT_TEST_COMPLETION_LOG"
+set -l remove_completions (complete -C 'wt remove --f')
+set -l remove_completion_calls (string split \n -- (string collect < "$WT_TEST_COMPLETION_LOG"))
+_wt_test_assert_equal 1 (count $remove_completion_calls) 'native remove completion should invoke the binary exactly once'
+
+_wt_test_assert_equal (string join '|' -- $remove_completions) (string join '|' -- $delete_completions) 'delete completion should match native remove flags'
+_wt_test_assert_equal '--force|--force-delete|--foreground|--format' (string join '|' -- $delete_completions) 'delete completion should return native removal flags'
+
+command rm -f "$WT_TEST_COMPLETION_LOG"
+set -l delete_all_completions (complete -C 'wt delete ')
+set -l delete_all_completion_calls (string split \n -- (string collect < "$WT_TEST_COMPLETION_LOG"))
+command rm -f "$WT_TEST_COMPLETION_LOG"
+set -l remove_all_completions (complete -C 'wt remove ')
+set -l remove_all_completion_calls (string split \n -- (string collect < "$WT_TEST_COMPLETION_LOG"))
+_wt_test_assert_equal 1 (count $delete_all_completion_calls) 'delete full completion should invoke the binary exactly once'
+_wt_test_assert_equal 1 (count $remove_all_completion_calls) 'remove full completion should invoke the binary exactly once'
+_wt_test_assert_equal (string join '|' -- $remove_all_completions) (string join '|' -- $delete_all_completions) 'delete full completion should match native remove candidates'
+
+command rm -f "$WT_TEST_COMPLETION_LOG"
+set -l switch_completions (complete -C 'wt switch --')
+set -l switch_completion_calls (string split \n -- (string collect < "$WT_TEST_COMPLETION_LOG"))
+_wt_test_assert_equal 1 (count $switch_completion_calls) 'native switch completion should invoke the binary exactly once'
+_wt_test_assert_equal '--create|--base' (string join '|' -- $switch_completions) 'native switch completion should retain its candidates'
+
+set -l argument_delete_completions (complete -C 'wt remove delete ')
+set -l argument_delete (string match -- 'delete*' $argument_delete_completions)
+_wt_test_assert_equal 0 (count $argument_delete) 'delete should not be suggested in an argument position'
 
 set -l match_output (__wt_match_local_worktree smart feature/CNS-123-smart-switch feature/unrelated)
 set -l match_status $status
