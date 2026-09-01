@@ -133,6 +133,61 @@ set match_status $status
 _wt_test_assert_status 2 $match_status 'multiple partial worktree matches should be ambiguous'
 _wt_test_assert_equal 'a-smart|m-smart|z-smart' (string join '|' $match_output) 'ambiguous partial names should be sorted'
 
+set -l parser_output (__wt_single_remove_target_index cns-456 --force)
+set -l parser_status $status
+_wt_test_assert_status 0 $parser_status 'remove target before trailing boolean option should be classified'
+_wt_test_assert_equal '1' "$parser_output" 'remove target before trailing boolean option should return its index'
+
+set parser_output (__wt_single_remove_target_index --force cns-456 -D)
+set parser_status $status
+_wt_test_assert_status 0 $parser_status 'remove target between boolean options should be classified'
+_wt_test_assert_equal '2' "$parser_output" 'remove target between boolean options should return its index'
+
+set parser_output (__wt_single_remove_target_index --format json cns-456)
+set parser_status $status
+_wt_test_assert_status 0 $parser_status 'remove target after separate format value should be classified'
+_wt_test_assert_equal '3' "$parser_output" 'separate format value should count toward target index'
+
+set parser_output (__wt_single_remove_target_index cns-456 --format=json)
+set parser_status $status
+_wt_test_assert_status 0 $parser_status 'remove target before inline format option should be classified'
+_wt_test_assert_equal '1' "$parser_output" 'inline format option should not affect target index'
+
+set parser_output (__wt_single_remove_target_index -Dfv cns-456)
+set parser_status $status
+_wt_test_assert_status 0 $parser_status 'boolean short option cluster should be classified'
+_wt_test_assert_equal '2' "$parser_output" 'short option cluster should count toward target index'
+
+set parser_output (__wt_single_remove_target_index -- -leading-target)
+set parser_status $status
+_wt_test_assert_status 0 $parser_status 'double dash should allow option-like remove target'
+_wt_test_assert_equal '2' "$parser_output" 'double dash should count toward target index'
+
+set parser_output (__wt_single_remove_target_index)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'remove with no arguments should have no target'
+_wt_test_assert_equal '' "$parser_output" 'remove with no arguments should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index one two)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'remove with multiple targets should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'multiple remove targets should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index -C /tmp one)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'separate repository context option should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'separate repository context option should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index -vC/tmp one)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'clustered repository context option should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'clustered repository context option should produce no parser output'
+
+set parser_output (__wt_single_remove_target_index --unknown one)
+set parser_status $status
+_wt_test_assert_status 1 $parser_status 'unknown remove option should be rejected'
+_wt_test_assert_equal '' "$parser_output" 'unknown remove option should produce no parser output'
+
 set -l smart_repo "$wt_test_tmp/smart-switch-repo"
 command git init --quiet --initial-branch=main "$smart_repo"
 command git -C "$smart_repo" -c user.name=Test -c user.email=test@example.com commit --quiet --allow-empty -m initial

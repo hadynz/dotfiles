@@ -135,6 +135,67 @@ function __wt_switch_bypasses_smart_match
     return 1
 end
 
+# Print the one-based argument index when remove has exactly one eligible target.
+# Return 1 for no target, multiple targets, repository context, or unknown syntax.
+function __wt_single_remove_target_index
+    set -l target_indexes
+    set -l skip_next false
+    set -l positional_only false
+    set -l argument_index 0
+
+    for arg in $argv
+        set argument_index (math $argument_index + 1)
+
+        if test "$skip_next" = true
+            set skip_next false
+            continue
+        end
+
+        if test "$positional_only" = true
+            set -a target_indexes $argument_index
+            continue
+        end
+
+        if test "$arg" = --
+            set positional_only true
+            continue
+        end
+
+        switch "$arg"
+            case --format --config --config-set
+                set skip_next true
+            case '--format=*' '--config=*' '--config-set=*'
+            case --no-delete-branch --force-delete --foreground --reap --force --help --no-hooks --verbose --yes
+            case '--*'
+                return 1
+            case '-*'
+                set -l short_options (string sub --start 2 -- "$arg")
+                if test -z "$short_options"
+                    return 1
+                end
+
+                for short_option in (string split '' -- "$short_options")
+                    switch "$short_option"
+                        case D f h v y
+                        case C '*'
+                            return 1
+                    end
+                end
+            case '*'
+                set -a target_indexes $argument_index
+        end
+    end
+
+    if test "$skip_next" = true
+        return 1
+    end
+    if test (count $target_indexes) -ne 1
+        return 1
+    end
+
+    printf '%s\n' "$target_indexes[1]"
+end
+
 function wt
     set -l worktrunk_bin "$WORKTRUNK_BIN"
     if test -z "$worktrunk_bin"
