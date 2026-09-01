@@ -231,7 +231,7 @@ function __wt_complete_command_position
     test (count $command_tokens) -eq 1
 end
 
-function __wt_complete_delete
+function __wt_complete_delete_condition
     set -l command_tokens (commandline --current-process --tokenize --cut-at-cursor)
     if test (count $command_tokens) -lt 2
         return 1
@@ -242,6 +242,12 @@ function __wt_complete_delete
     if test "$command_tokens[2]" != delete
         return 1
     end
+end
+
+function __wt_complete_delete
+    __wt_complete_delete_condition; or return 1
+
+    set -l command_tokens (commandline --current-process --tokenize --cut-at-cursor)
 
     set command_tokens[2] remove
     set -l current_token (commandline --current-token)
@@ -257,7 +263,7 @@ function __wt_complete_delete
 end
 
 complete --keep-order --command wt --condition __wt_complete_command_position --arguments delete --description 'Alias for remove'
-complete --keep-order --command wt --condition '__wt_complete_delete' --arguments '(__wt_complete_delete)'
+complete --keep-order --command wt --condition '__wt_complete_delete_condition' --arguments '(__wt_complete_delete)'
 
 function wt
     set -l worktrunk_bin "$WORKTRUNK_BIN"
