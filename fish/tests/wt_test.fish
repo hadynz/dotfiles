@@ -50,6 +50,12 @@ printf '%s\n' \
 printf '%s\n' \
     '#!/bin/sh' \
     'printf "%s\n" "$@" > "$WT_TEST_BINARY_LOG"' \
+    'if [ "$COMPLETE" = "fish" ]; then' \
+    '    if [ "$3" = "remove" ]; then' \
+    '        printf "%s\n" --force --force-delete --foreground --format' \
+    '    fi' \
+    '    exit 0' \
+    'fi' \
     'if [ "$1" = "config" ]; then' \
     '    /bin/cat "$WT_TEST_GENERATED_INTEGRATION"' \
     'fi' \
@@ -81,6 +87,9 @@ function cargo
     printf '%s\n' $argv > "$WT_TEST_CARGO_LOG"
 end
 
+complete --erase --command wt
+complete --keep-order --exclusive --command wt --arguments "(COMPLETE=fish $wt_test_tmp/wt -- (commandline --current-process --tokenize --cut-at-cursor) (commandline --current-token))"
+
 source (status dirname)/../custom-functions/wt.fish
 
 command rm -f "$WT_TEST_NATIVE_LOG"
@@ -97,6 +106,17 @@ set -e COMPLETE
 _wt_test_assert_status 0 $call_status 'delete completion mode should succeed'
 _wt_test_assert_log 'remove|--help' "$WT_TEST_BINARY_LOG" 'completion mode should normalize delete before calling the binary'
 _wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'delete completion mode should bypass the generated native function'
+
+set -l root_completions (complete -C 'wt ')
+set -l delete_completion (string match -- 'delete*' $root_completions)
+set -l delete_fields (string split \t -- "$delete_completion")
+_wt_test_assert_equal delete "$delete_fields[1]" 'root completion should expose delete'
+_wt_test_assert_equal 'Alias for remove' "$delete_fields[2]" 'root completion should describe delete as an alias for remove'
+
+set -l remove_completions (complete -C 'wt remove --f')
+set -l delete_completions (complete -C 'wt delete --f')
+_wt_test_assert_equal (string join '|' -- $remove_completions) (string join '|' -- $delete_completions) 'delete completion should match native remove flags'
+_wt_test_assert_equal '--force|--force-delete|--foreground|--format' (string join '|' -- $delete_completions) 'delete completion should return native removal flags'
 
 set -l match_output (__wt_match_local_worktree smart feature/CNS-123-smart-switch feature/unrelated)
 set -l match_status $status
