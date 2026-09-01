@@ -83,6 +83,21 @@ end
 
 source (status dirname)/../custom-functions/wt.fish
 
+command rm -f "$WT_TEST_NATIVE_LOG"
+wt delete
+set -l call_status $status
+_wt_test_assert_status 0 $call_status 'delete without a target should succeed'
+_wt_test_assert_log 'remove' "$WT_TEST_NATIVE_LOG" 'delete should normalize to native remove'
+
+command rm -f "$WT_TEST_BINARY_LOG" "$WT_TEST_NATIVE_LOG"
+set -gx COMPLETE fish
+wt delete --help
+set call_status $status
+set -e COMPLETE
+_wt_test_assert_status 0 $call_status 'delete completion mode should succeed'
+_wt_test_assert_log 'remove|--help' "$WT_TEST_BINARY_LOG" 'completion mode should normalize delete before calling the binary'
+_wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'delete completion mode should bypass the generated native function'
+
 set -l match_output (__wt_match_local_worktree smart feature/CNS-123-smart-switch feature/unrelated)
 set -l match_status $status
 _wt_test_assert_status 0 $match_status 'unique local-worktree substring should resolve'

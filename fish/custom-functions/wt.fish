@@ -150,14 +150,19 @@ function wt
     # the resolved binary in the global override shared with completions.
     set -g WORKTRUNK_BIN "$worktrunk_bin"
 
+    set -l native_args $argv
+    if test (count $native_args) -ge 1
+        and test "$native_args[1]" = delete
+        set native_args remove $native_args[2..-1]
+    end
+
     # Let the binary emit completions directly and avoid recursing through the
     # wrapper when Worktrunk's completion script sets COMPLETE.
     if set -q COMPLETE
-        command "$worktrunk_bin" $argv
+        command "$worktrunk_bin" $native_args
         return
     end
 
-    set -l native_args $argv
     if test (count $argv) -ge 2
         and test "$argv[1]" = switch
         and string match --ignore-case --quiet --regex '^https?://bitbucket\.org/[^/]+/[^/]+/pull-requests/[0-9]+([/?#].*)?$' -- "$argv[2]"
