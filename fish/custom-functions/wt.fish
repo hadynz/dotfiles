@@ -91,6 +91,25 @@ function __wt_match_local_worktree --argument-names target
     return 2
 end
 
+# Print one canonical branch for a unique match.
+# Status 0: one match; 1: preserve native target; 2: ambiguous matches printed.
+function __wt_resolve_local_worktree_target --argument-names target
+    set -l worktree_branches (__wt_local_worktree_branches)
+    set -l discovery_status $status
+    test $discovery_status -eq 0; or return 1
+
+    __wt_is_local_worktree_path "$target"; and return 1
+
+    __wt_match_local_worktree "$target" $worktree_branches
+end
+
+function __wt_report_ambiguous_local_worktrees --argument-names target
+    set -l matches $argv[2..-1]
+    echo "wt: '$target' matches multiple local worktrees:" >&2
+    printf '  %s\n' $matches >&2
+    echo 'wt: retry with a more specific name' >&2
+end
+
 # Return success when trailing switch arguments require native target handling.
 function __wt_switch_bypasses_smart_match
     set -l skip_next false
@@ -282,20 +301,13 @@ function wt
         and not string match --ignore-case --quiet --regex '^https?://' -- "$argv[2]"
         and not __wt_switch_bypasses_smart_match $argv[3..-1]
 
-        set -l worktree_branches (__wt_local_worktree_branches)
-        set -l discovery_status $status
-        if test $discovery_status -eq 0
-            and not __wt_is_local_worktree_path "$argv[2]"
-            set -l worktree_matches (__wt_match_local_worktree "$argv[2]" $worktree_branches)
-            set -l match_status $status
-            if test $match_status -eq 0
-                set native_args switch "$worktree_matches[1]" $argv[3..-1]
-            else if test $match_status -eq 2
-                echo "wt: '$argv[2]' matches multiple local worktrees:" >&2
-                printf '  %s\n' $worktree_matches >&2
-                echo 'wt: retry with a more specific name' >&2
-                return 1
-            end
+        set -l worktree_matches (__wt_resolve_local_worktree_target "$argv[2]")
+        set -l match_status $status
+        if test $match_status -eq 0
+            set native_args switch "$worktree_matches[1]" $argv[3..-1]
+        else if test $match_status -eq 2
+            __wt_report_ambiguous_local_worktrees "$argv[2]" $worktree_matches
+            return 1
         end
     end
 
