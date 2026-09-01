@@ -292,6 +292,89 @@ _wt_test_assert_log 'switch|feature/CNS-123-smart-switch' "$WT_TEST_NATIVE_LOG" 
 
 command rm -f "$WT_TEST_NATIVE_LOG"
 pushd "$smart_repo" >/dev/null
+wt remove cns-456 --force
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'smart remove should succeed'
+_wt_test_assert_log 'remove|feature/CNS-456-smart-search|--force' "$WT_TEST_NATIVE_LOG" 'remove should use the canonical local-worktree branch'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt delete --no-hooks CNS-456
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'smart delete should succeed case-insensitively'
+_wt_test_assert_log 'remove|--no-hooks|feature/CNS-456-smart-search' "$WT_TEST_NATIVE_LOG" 'delete should normalize and preserve option order around the resolved target'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt remove feature/CNS-123-smart-switch
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'exact smart remove should succeed'
+_wt_test_assert_log 'remove|feature/CNS-123-smart-switch' "$WT_TEST_NATIVE_LOG" 'exact removal target should beat its containing followup branch'
+
+command rm -f "$WT_TEST_NATIVE_LOG" "$WT_TEST_ERROR_LOG"
+pushd "$smart_repo" >/dev/null
+wt delete smart 2>"$WT_TEST_ERROR_LOG"
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 1 $call_status 'ambiguous smart delete should fail'
+_wt_test_assert_log '' "$WT_TEST_NATIVE_LOG" 'ambiguous smart delete should not call Worktrunk'
+_wt_test_assert_log "wt: 'smart' matches multiple local worktrees:|  feature/CNS-123-smart-switch|  feature/CNS-123-smart-switch-followup|  feature/CNS-456-smart-search|wt: retry with a more specific name" "$WT_TEST_ERROR_LOG" 'ambiguous smart delete should list sorted candidates and guidance'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt delete guaranteed-unmatched-target
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'unmatched delete should use native pass-through'
+_wt_test_assert_log 'remove|guaranteed-unmatched-target' "$WT_TEST_NATIVE_LOG" 'unmatched delete should remain normalized native remove'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt delete cns-456 smart
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'multiple-target delete should use native pass-through'
+_wt_test_assert_log 'remove|cns-456|smart' "$WT_TEST_NATIVE_LOG" 'multiple-target delete should preserve every target'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt delete "$detached_worktree"
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'registered worktree path delete should use native pass-through'
+_wt_test_assert_log "remove|$detached_worktree" "$WT_TEST_NATIVE_LOG" 'registered worktree path delete should not be rewritten'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt delete cns-456 -C "$wt_test_tmp"
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'repository context delete should use native pass-through'
+_wt_test_assert_log "remove|cns-456|-C|$wt_test_tmp" "$WT_TEST_NATIVE_LOG" 'repository context delete should not use the current repository for smart resolution'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+set -g WT_TEST_NATIVE_STATUS 29
+pushd "$smart_repo" >/dev/null
+wt delete guaranteed-unmatched-target
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 29 $call_status 'native delete failure should pass through'
+_wt_test_assert_log 'remove|guaranteed-unmatched-target' "$WT_TEST_NATIVE_LOG" 'native delete failure should retain normalized arguments'
+set -g WT_TEST_NATIVE_STATUS 0
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
+wt remove --format json cns-456
+set call_status $status
+popd >/dev/null
+_wt_test_assert_status 0 $call_status 'delete target after a value option should resolve'
+_wt_test_assert_log 'remove|--format|json|feature/CNS-456-smart-search' "$WT_TEST_NATIVE_LOG" 'delete should preserve value options while replacing only its target'
+
+command rm -f "$WT_TEST_NATIVE_LOG"
+pushd "$smart_repo" >/dev/null
 wt switch CNS-999
 set call_status $status
 popd >/dev/null

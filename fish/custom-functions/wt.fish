@@ -309,6 +309,23 @@ function wt
             __wt_report_ambiguous_local_worktrees "$argv[2]" $worktree_matches
             return 1
         end
+    else if test (count $native_args) -ge 1
+        and test "$native_args[1]" = remove
+
+        set -l remove_target_offset (__wt_single_remove_target_index $native_args[2..-1])
+        set -l parser_status $status
+        if test $parser_status -eq 0
+            set -l remove_target_index (math $remove_target_offset + 1)
+            set -l remove_target "$native_args[$remove_target_index]"
+            set -l worktree_matches (__wt_resolve_local_worktree_target "$remove_target")
+            set -l match_status $status
+            if test $match_status -eq 0
+                set native_args[$remove_target_index] "$worktree_matches[1]"
+            else if test $match_status -eq 2
+                __wt_report_ambiguous_local_worktrees "$remove_target" $worktree_matches
+                return 1
+            end
+        end
     end
 
     if not functions -q __worktrunk_native
